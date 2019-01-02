@@ -6,12 +6,15 @@ import history
 import fbapi
 import status
 
+import pandas as pd
+
 
 LOG_DATA_DIR = "log"
 CSV_OUTPUT_DIR = "generated_graphs/csv"
+NAME_FILE = "names_storage.json"
 
 # LOL TIMEZONES TOO HARD
-UTC_OFFSET = 11
+UTC_OFFSET = 1
 
 ONE_DAY_SECONDS = 60 * 60 * 24
 
@@ -20,6 +23,8 @@ class Grapher():
     def __init__(self):
         if not os.path.exists(CSV_OUTPUT_DIR):
             os.makedirs(CSV_OUTPUT_DIR)
+        
+        self.names = pd.read_json(NAME_FILE)
 
     def to_csv(self, uid, start_time, end_time):
 
@@ -27,11 +32,10 @@ class Grapher():
         status_history = history.StatusHistory(uid)
 
         # Their Facebook username.
-        #uname = fbapi.get_user_name(uid)
-
+        uname = self.names.loc[self.names['id'] == int(uid), 'name'].iloc[0]
 
         # Generate a CSV from the multiple linear timeseries
-        with open("generated_graphs/csv/{uid}.csv".format(uid=uid), "w") as f:
+        with open("generated_graphs/csv/{uname}.csv".format(uname=uname), "w") as f:
 
             f.write("time,")
             f.write(",".join(status.Status.statuses))

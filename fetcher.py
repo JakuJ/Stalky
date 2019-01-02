@@ -27,7 +27,7 @@ class Fetcher():
     REQUEST_HEADERS = {
         'accept': '*/*',
         'accept-encoding': 'gzip, deflate, sdch',
-        'accept-language': 'en-US,en;q=0.8,en-AU;q=0.6',
+        'accept-language': 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7',
         'cookie': secrets.cookie,
         'dnt': '1',
         'origin': 'https://www.facebook.com',

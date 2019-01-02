@@ -4,3 +4,4 @@ SECRETS.txt
 *.pyc
 generated_graphs/
 log/
+names_storage.json
