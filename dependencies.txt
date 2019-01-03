@@ -5,6 +5,6 @@ Werkzeug
 argparse
 itsdangerous
 requests
-wsgiref
 pandas
 progressbar2
+gunicorn

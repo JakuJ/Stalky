@@ -6,7 +6,7 @@ import pandas as pd
 NAME_FILE = "names_storage.json"
 
 def main():
-    ids = pd.Series(map(lambda x: re.match(r'\d+', x)[0], os.listdir('./log/')), dtype='int64').drop_duplicates()
+    ids = pd.Series(map(lambda x: re.match(r'\d+', x).group(0), os.listdir('./log/')), dtype='int64').drop_duplicates()
 
     if os.path.exists(NAME_FILE):
         known = pd.read_json(NAME_FILE)

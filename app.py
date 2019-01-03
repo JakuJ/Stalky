@@ -6,21 +6,21 @@ import graph
 
 NAME_FILE = "names_storage.json"
 
-app = Flask('stalky')
+application = Flask('stalky')
 
 # prevent cached responses
-@app.after_request
+@application.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
 
-@app.route('/')
+@application.route('/')
 def index():
     return render_template("main.html")
 
-@app.route('/data/<string:query>')
+@application.route('/data/<string:query>')
 def get_data_for_query(query):
     print('query: {query}'.format(query=query), file=sys.stderr)
     uname = ""
@@ -41,4 +41,4 @@ def get_data_for_query(query):
 if __name__ == '__main__':
     update_names.main()
     graph.main()
-    app.run(host='localhost', port=5001, debug=True)
+    application.run(host='localhost', port=5001, debug=True)

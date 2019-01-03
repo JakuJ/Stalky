@@ -50,13 +50,14 @@ class Fetcher():
     # Hey hey, Facebook puts this in front of all their JSON to prevent hijacking. But don't worry, we're ~verified secure~.
     JSON_PAYLOAD_PREFIX = "for (;;); "
 
-    def __init__(self):
+    def __init__(self, log_path):
         if not os.path.exists(graph.LOG_DATA_DIR):
             os.makedirs(graph.LOG_DATA_DIR)
         self.reset_params()
         self.excludes = []
         if hasattr(secrets, 'excludes'):
             self.excludes = secrets.excludes.split(',',1)
+        self.log_path = log_path
 
     def make_request(self):
         # Load balancing is for chumps. Facebook can take it.
@@ -77,9 +78,11 @@ class Fetcher():
         except ValueError as e:
             print(str(e))
             return None
-
+        
+        with open(self.log_path, 'a') as f:
+            print("Response:" + str(data), file=f)
+        
         print("Response:" + str(data))
-
         return data
 
 
@@ -208,7 +211,7 @@ class Fetcher():
 
 
 if __name__ == "__main__":
-    f = Fetcher()
+    f = Fetcher(log_path="fetcher_log.txt")
     while True:
         try:
             f.start_request()
