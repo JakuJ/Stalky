@@ -3,5 +3,7 @@ SECRETS.txt
 .*.swp
 *.pyc
 generated_graphs/
-log/
+log*/
 names_storage.json
+screening.txt
+__pycache__/

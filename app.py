@@ -1,6 +1,8 @@
 from flask import Flask, render_template, send_file
 import os
 import sys
+import update_names
+import graph
 
 NAME_FILE = "names_storage.json"
 
@@ -37,4 +39,6 @@ def get_data_for_query(query):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    update_names.main()
+    graph.main()
+    app.run(host='localhost', port=5001, debug=True)

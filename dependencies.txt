@@ -1,0 +1,10 @@
+Flask
+Jinja2
+MarkupSafe
+Werkzeug
+argparse
+itsdangerous
+requests
+wsgiref
+pandas
+progressbar2

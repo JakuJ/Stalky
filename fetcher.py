@@ -7,7 +7,6 @@ import requests
 
 import graph
 
-
 secrets = ap.Namespace()
 
 # Load the secrets from file so some scrublord like me doesn't accidentally commit them to git.
@@ -21,7 +20,20 @@ SLEEP_TIME = 1
 
 OFFLINE_STATUS_JSON = """{"lat": "offline", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "invisible", "messengerStatus": "invisible"}"""
 ACTIVE_STATUS_JSON = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
-
+# p0 | p2 | a2
+# 1789 | 621 | 61
+VC0_ACTIVE = """{ "lat": "online", "webStatus": "active", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
+# 966 | 928 | 320
+# Most likely messengerStatus
+VC74_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "active"}"""
+# 182 | 160 | 38
+# Seems to map to fbAppStatus?
+VC8_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "active", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
+# 5 | 2 | 0
+# wilczek
+VC10_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "active", "status": "active", "messengerStatus": "invisible"}"""
+# vc: 2 is also a thing apparently
+# TODO Crack VC: 2
 class Fetcher():
     # Headers to send with every request.
     REQUEST_HEADERS = {
@@ -71,15 +83,47 @@ class Fetcher():
         return data
 
 
-    def _log_lat(self, uid, lat_time):
+    def _log_lat(self, uid, record, activity_key):
         if not uid in self.excludes:
             with open("log/{uid}.txt".format(uid=uid), "a") as f:
-                # Now add an online status at the user's LAT.
+                # Now add an online status at the user's LA(T).
                 user_data = []
-                user_data.append(lat_time)
-                user_data.append(ACTIVE_STATUS_JSON)
+                if activity_key == 'a':
+                    try:
+                        user_data.append(str(record['la']))
+                    except:
+                        print('')
+                elif activity_key == 'p':
+                    user_data.append(str(record['lat']))
+                if not 'vc' in record:
+                    user_data.append(ACTIVE_STATUS_JSON)
+                else:
+                    if record['vc'] == 0:
+                        user_data.append(VC0_ACTIVE)
+                    elif record['vc'] == 8:
+                        user_data.append(VC8_ACTIVE)
+                    elif record['vc'] == 10:
+                        user_data.append(VC10_ACTIVE)
+                    elif record['vc'] == 74:
+                        user_data.append(VC74_ACTIVE)
+                    else:
+                        print('Invalid vc value: ' + str(record['vc']))
+                        user_data.append(ACTIVE_STATUS_JSON)
+
                 f.write("|".join(user_data))
                 f.write("\n")
+
+                # Now log their current status stored sometimes in 'a' or 'p' property
+                # if activity_key in record:
+                #     with open("log/{uid}.txt".format(uid=uid), "a") as f:
+                #         user_data = []
+                #         user_data.append(str(time.time()))
+                #         if str(record[activity_key]) == '2':
+                #             user_data.append(ACTIVE_STATUS_JSON)
+                #         elif str(record[activity_key]) == '0':
+                #             user_data.append(OFFLINE_STATUS_JSON)
+                #         f.write("|".join(user_data))
+                #         f.write("\n")
 
                 # Assume the user is currently offline, since we got a lat for them. (This is guaranteed I think.)
                 user_data = []
@@ -118,22 +162,13 @@ class Fetcher():
                             uid = key
 
                             # Log the LAT in this message.
-                            self._log_lat(uid, str(item["overlay"][uid]["la"]))
-
-                            # Now log their current status.
-                            if "p" in item["overlay"][uid]:
-                                with open("log/{uid}.txt".format(uid=uid), "a") as f:
-                                    user_data = []
-                                    user_data.append(str(time.time()))
-                                    user_data.append(json.dumps(item["overlay"][uid]["p"]))
-                                    f.write("|".join(user_data))
-                                    f.write("\n")
+                            self._log_lat(uid, item["overlay"][uid], 'a')
 
                 # This list contains the last active times (lats) of users.
                 if "buddyList" in item:
                     for uid in item["buddyList"]:
                         if "lat" in item["buddyList"][uid]:
-                            self._log_lat(uid, str(item["buddyList"][uid]["lat"]))
+                            self._log_lat(uid, item["buddyList"][uid], 'p')
 
 
 
