@@ -86,10 +86,10 @@
                     chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
                     chart.x2Axis.tickFormat(d => d3.time.format('%x')(new Date(d)));
 
+                    var statusTypes = ["offline", "invisible", "idle", "active"];
+
                     chart.yAxis.tickFormat(val => statusTypes[val]);
                     chart.y2Axis.tickFormat(d3.format(',.2f'));
-
-                    var statusTypes = "offline invisible idle active".split(" ");
 
                     d3.select("#chart")
                         .datum(graphData)

@@ -8,3 +8,4 @@ names_storage.json
 fetcher_log.txt
 __pycache__/
 .vscode/
+auth_hash.txt
