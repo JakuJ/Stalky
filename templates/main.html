@@ -34,7 +34,7 @@
             e.preventDefault();
             var query = $("#query-input").val();
 
-            var statuses = "status webStatus messengerStatus fbAppStatus otherStatus".split(" ");
+            var statuses = "status vc_0 vc_74 vc_8 vc_10".split(" ");
 
             d3.csv("data/" + query, function (error, data) {
 
@@ -57,19 +57,19 @@
                             values: []
                         },
                         {
-                            key: "webStatus",
+                            key: "vc_0",
                             values: []
                         },
                         {
-                            key: "messengerStatus",
+                            key: "vc_74",
                             values: []
                         },
                         {
-                            key: "fbAppStatus",
+                            key: "vc_8",
                             values: []
                         },
                         {
-                            key: "otherStatus",
+                            key: "vc_10",
                             values: []
                         },
                     ];

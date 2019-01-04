@@ -15,23 +15,23 @@ with open("SECRETS.txt") as f:
         vals = line.strip().split('=', 1)
         setattr(secrets, vals[0].lower(), vals[1])
 
-
 SLEEP_TIME = 1
 
-OFFLINE_STATUS_JSON = """{"lat": "offline", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "invisible", "messengerStatus": "invisible"}"""
-ACTIVE_STATUS_JSON = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
+OFFLINE_STATUS_JSON = """{"lat": "offline", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "invisible", "status": "invisible", "vc_74": "invisible"}"""
+ACTIVE_STATUS_JSON = """{ "lat": "online", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "invisible", "status": "active", "vc_74": "invisible"}"""
 # p0 | p2 | a2
 # 1789 | 621 | 61
-VC0_ACTIVE = """{ "lat": "online", "webStatus": "active", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
+# FORMER WEB STATUS
+VC0_ACTIVE = """{ "lat": "online", "vc_0": "active", "vc_8": "invisible", "vc_10": "invisible", "status": "active", "vc_74": "invisible"}"""
 # 966 | 928 | 320
-# Most likely messengerStatus
-VC74_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "invisible", "status": "active", "messengerStatus": "active"}"""
+# FORMER MESSENGER STATUS
+VC74_ACTIVE = """{ "lat": "online", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "invisible", "status": "active", "vc_74": "active"}"""
 # 182 | 160 | 38
-# Seems to map to fbAppStatus?
-VC8_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "active", "otherStatus": "invisible", "status": "active", "messengerStatus": "invisible"}"""
+# FORMER FB APP STATUS
+VC8_ACTIVE = """{ "lat": "online", "vc_0": "invisible", "vc_8": "active", "vc_10": "invisible", "status": "active", "vc_74": "invisible"}"""
 # 5 | 2 | 0
-# wilczek
-VC10_ACTIVE = """{ "lat": "online", "webStatus": "invisible", "fbAppStatus": "invisible", "otherStatus": "active", "status": "active", "messengerStatus": "invisible"}"""
+# FORMER OTHER STATUS
+VC10_ACTIVE = """{ "lat": "online", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "active", "status": "active", "vc_74": "invisible"}"""
 # vc: 2 is also a thing apparently
 # TODO Crack VC: 2
 class Fetcher():
@@ -138,7 +138,6 @@ class Fetcher():
 
 
     def start_request(self):
-        print(">")
         resp = self.make_request()
         if resp is None:
             print("Got error from request, restarting...")

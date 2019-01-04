@@ -3588,3 +3588,6 @@ Response:{'t': 'msg', 'seq': 463, 'u': 100003080735310, 'ms': [{'view_id': 17666
 >
 Response:{'t': 'msg', 'seq': 464, 'u': 100003080735310, 'ms': [{'view_id': 176660718427, 'overlay': {'100001364943678': {'c': 2138, 'la': 1546557573, 'vc': 74, 's': 'push', 'a': 2}}, 'type': 'buddylist_overlay'}]}
 >
+Response:{'t': 'lb', 'lb_info': {'sticky': '1516', 'pool': 'rlla0c03_chatproxy-regional'}}
+Response:{'t': 'fullReload', 'seq': 561}
+Response:{'t': 'msg', 'seq': 562, 'u': 100003080735310, 'ms': [{'view_id': 176660718427, 'overlay': {'100001364943678': {'c': 2138, 'la': 1546559440, 'vc': 74, 's': 'push', 'a': 2}}, 'type': 'buddylist_overlay'}]}

@@ -6,7 +6,6 @@ class StatusLevel():
     IDLE = 2
     ACTIVE = 3
 
-
 class Status():
     """The status of a user."""
 
@@ -17,16 +16,15 @@ class Status():
         "active": StatusLevel.ACTIVE
     }
 
-    statuses = "status webStatus messengerStatus fbAppStatus otherStatus".split()
+    statuses = "status vc_0 vc_74 vc_8 vc_10".split()
 
     status_type_map = {
         "status": 4,
-        "webStatus": 3,
-        "messengerStatus": 2,
-        "fbAppStatus": 1,
-        "otherStatus": 0
+        "vc_0": 3,
+        "vc_74": 2,
+        "vc_8": 1,
+        "vc_10": 0
     }
-
 
     def __init__(self, time, status_json):
 

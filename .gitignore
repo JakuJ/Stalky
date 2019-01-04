@@ -5,5 +5,5 @@ SECRETS.txt
 generated_graphs/
 log*/
 names_storage.json
-screening.txt
+fetcher_log.txt
 __pycache__/
