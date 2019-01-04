@@ -26,7 +26,7 @@ def main():
     for i in range(friends):
         t_id = unlabeled.loc[i, 'id']
         t_name = fetch_user_name(t_id)
-        print(i, "/", friends - 1, ":", t_id, '->', t_name)
+        print(i + 1, "/", friends, ":", t_id, '->', t_name)
         unlabeled.loc[i, 'name'] = t_name
 
     all_names = unlabeled.set_index(unlabeled['index']).drop(columns=['index'])

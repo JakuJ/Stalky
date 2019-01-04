@@ -3,9 +3,10 @@ import os
 import sys
 import update_names
 import graph
-import history
 from fbapi import get_user_id
 import re
+import time
+import pandas as pd
 
 NAME_FILE = "names_storage.json"
 
@@ -28,22 +29,25 @@ def get_data_for_query(query):
     print('query: {query}'.format(query=query), file=sys.stderr)
     uname = ""
 
-    for file in os.listdir('./generated_graphs/csv/'):
-        if query in file:
-            uname = file
+    if not os.path.exists(graph.CSV_OUTPUT_DIR):
+        os.makedirs(graph.CSV_OUTPUT_DIR)
+
+    for name in pd.read_json(NAME_FILE).loc[:, 'name']:
+        if query in name:
+            uname = name
             break
 
-    print('filename: {uname}'.format(uname=uname), file=sys.stderr)
+    print('found: {uname}'.format(uname=uname), file=sys.stderr)
     
     if uname == "":
         return render_template("main.html")
     else:
-        now = history.StatusHistory.START_TIME
         g = graph.Grapher()
+        now = int(time.time())
         print("Updating " + uname)
-        g.to_csv(get_user_id(uname[:-4]), start_time=now - 3 * graph.ONE_DAY_SECONDS, end_time=now)
+        g.to_csv(get_user_id(uname), start_time=now - 3 * graph.ONE_DAY_SECONDS, end_time=now)
         print("Done")
-        return send_file("generated_graphs/csv/{uname}".format(uname=uname))
+        return send_file("{path}/{uname}.csv".format(path=graph.CSV_OUTPUT_DIR, uname=uname))
 
 if __name__ == '__main__':
     update_names.main()

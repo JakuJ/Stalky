@@ -11,7 +11,6 @@ def fetch_user_name(fbid):
     return resp.url.split("/")[-1]
 
 def get_user_id(uname):
-    print(uname)
     names = pd.read_json(graph.NAME_FILE)
     return names.loc[names['name'] == uname, 'id'].iloc[0]
 
