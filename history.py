@@ -1,13 +1,9 @@
-
 import bisect
 import time
-
 import status
-
 
 class StatusHistory():
     """Object representing the history for a particular user. History stored sparse."""
-
 
     EPOCH_TIME = 1452556800
 
@@ -54,7 +50,7 @@ class StatusHistory():
 
     def normalised(self, max_time_back_seconds=None, resolution=60, status_type=None):
         """Turns a sparse time series into a dense one, with number of seconds per bucket specified by resolution.
-        If a status_type (status, webStatus, messengerStatus etc.) is given, returns a generator of the status level (online, offline, idle) for that status type."""
+        If a status_type (status, vc_0, vc_74 etc.) is given, returns a generator of the status level (online, offline, idle) for that status type."""
 
         if max_time_back_seconds is None:
             start_time = self.EPOCH_TIME

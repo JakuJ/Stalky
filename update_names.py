@@ -1,4 +1,4 @@
-import fbapi
+from fbapi import fetch_user_name
 import os
 import re
 import pandas as pd
@@ -17,12 +17,15 @@ def main():
     unlabeled = pd.merge(ids, known, how='outer', on='id', indicator=True).query('_merge == "left_only"').drop(columns=['_merge']).reset_index()
 
     friends = len(unlabeled)
-
-    print('Updating', friends, 'names')
+    
+    if friends > 0:
+        print('Updating', friends, 'names')
+    else:
+        print('All names up to date')
 
     for i in range(friends):
         t_id = unlabeled.loc[i, 'id']
-        t_name = fbapi.get_user_name(t_id)
+        t_name = fetch_user_name(t_id)
         print(i, "/", friends - 1, ":", t_id, '->', t_name)
         unlabeled.loc[i, 'name'] = t_name
 
@@ -32,8 +35,9 @@ def main():
     all_names = all_names.drop(columns=['name_x', 'name_y'])
 
     all_names.to_json(NAME_FILE)
-
-    print('All done')
+    
+    if friends > 0:
+        print('All done')
 
 if __name__ == '__main__':
     main()

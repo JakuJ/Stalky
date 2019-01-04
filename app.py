@@ -3,6 +3,9 @@ import os
 import sys
 import update_names
 import graph
+import history
+from fbapi import get_user_id
+import re
 
 NAME_FILE = "names_storage.json"
 
@@ -35,10 +38,13 @@ def get_data_for_query(query):
     if uname == "":
         return render_template("main.html")
     else:
+        now = history.StatusHistory.START_TIME
+        g = graph.Grapher()
+        print("Updating " + uname)
+        g.to_csv(get_user_id(uname[:-4]), start_time=now - 3 * graph.ONE_DAY_SECONDS, end_time=now)
+        print("Done")
         return send_file("generated_graphs/csv/{uname}".format(uname=uname))
-
 
 if __name__ == '__main__':
     update_names.main()
-    graph.main()
     application.run(host='localhost', port=5001, debug=True)

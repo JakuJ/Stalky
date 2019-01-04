@@ -2,20 +2,17 @@ import argparse as ap
 import json
 import os
 import time
-
 import requests
-
 import graph
 
-secrets = ap.Namespace()
+SLEEP_TIME = 1
 
 # Load the secrets from file so some scrublord like me doesn't accidentally commit them to git.
+secrets = ap.Namespace()
 with open("SECRETS.txt") as f:
     for line in f:
         vals = line.strip().split('=', 1)
         setattr(secrets, vals[0].lower(), vals[1])
-
-SLEEP_TIME = 1
 
 OFFLINE_STATUS_JSON = """{"lat": "offline", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "invisible", "status": "invisible", "vc_74": "invisible"}"""
 ACTIVE_STATUS_JSON = """{ "lat": "online", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "invisible", "status": "active", "vc_74": "invisible"}"""
@@ -33,7 +30,8 @@ VC8_ACTIVE = """{ "lat": "online", "vc_0": "invisible", "vc_8": "active", "vc_10
 # FORMER OTHER STATUS
 VC10_ACTIVE = """{ "lat": "online", "vc_0": "invisible", "vc_8": "invisible", "vc_10": "active", "status": "active", "vc_74": "invisible"}"""
 # vc: 2 is also a thing apparently
-# TODO Crack VC: 2
+# TODO Crack VC2 (game status? it's sooo rare)
+
 class Fetcher():
     # Headers to send with every request.
     REQUEST_HEADERS = {
@@ -85,7 +83,6 @@ class Fetcher():
         print("Response:" + str(data))
         return data
 
-
     def _log_lat(self, uid, record, activity_key):
         if not uid in self.excludes:
             with open("log/{uid}.txt".format(uid=uid), "a") as f:
@@ -116,6 +113,7 @@ class Fetcher():
                 f.write("|".join(user_data))
                 f.write("\n")
 
+                # TODO a and p 0/2 status logging
                 # Now log their current status stored sometimes in 'a' or 'p' property
                 # if activity_key in record:
                 #     with open("log/{uid}.txt".format(uid=uid), "a") as f:
@@ -135,8 +133,6 @@ class Fetcher():
                 f.write("|".join(user_data))
                 f.write("\n")
 
-
-
     def start_request(self):
         resp = self.make_request()
         if resp is None:
@@ -155,24 +151,18 @@ class Fetcher():
         if "ms" in resp:
             for item in resp["ms"]:
                 # The online/offline info we're looking for.
-
                 if item["type"] == "buddylist_overlay":
-
                     # Find the key with all the message details, that one is the UID.
                     for key in item["overlay"]:
                         if type(item["overlay"][key]) == dict:
                             uid = key
-
                             # Log the LAT in this message.
                             self._log_lat(uid, item["overlay"][uid], 'a')
-
                 # This list contains the last active times (lats) of users.
                 if "buddyList" in item:
                     for uid in item["buddyList"]:
                         if "lat" in item["buddyList"][uid]:
                             self._log_lat(uid, item["buddyList"][uid], 'p')
-
-
 
     def reset_params(self):
         self.params = {
@@ -207,7 +197,6 @@ class Fetcher():
             'viewer_uid': secrets.uid,
             'wtc': '171%2C170%2C0.000%2C171%2C171'
         }
-
 
 if __name__ == "__main__":
     f = Fetcher(log_path="fetcher_log.txt")

@@ -1,22 +1,17 @@
 
 import datetime
 import os
-
 import history
 import fbapi
 import status
-
 import pandas as pd
 import progressbar
-
 
 LOG_DATA_DIR = "log"
 CSV_OUTPUT_DIR = "generated_graphs/csv"
 NAME_FILE = "names_storage.json"
 
-# LOL TIMEZONES TOO HARD
 UTC_OFFSET = 1
-
 ONE_DAY_SECONDS = 60 * 60 * 24
 
 class Grapher():
@@ -33,7 +28,7 @@ class Grapher():
         status_history = history.StatusHistory(uid)
 
         # Their Facebook username.
-        uname = self.names.loc[self.names['id'] == int(uid), 'name'].iloc[0]
+        uname = fbapi.get_user_name(int(uid))
 
         # Generate a CSV from the multiple linear timeseries
         with open("generated_graphs/csv/{uname}.csv".format(uname=uname), "w") as f:
@@ -43,7 +38,6 @@ class Grapher():
             f.write("\n")
 
             # TODO preprocess sort and splice this instead of linear search.
-            # UPDATE nahhhh I think I'll just commit it to github ;>_>
             seen_times = set()
             for data_point in status_history.activity:
                 statuses = [str(data_point._status[status_type]) for status_type in status.Status.statuses]
@@ -59,14 +53,12 @@ class Grapher():
                     f.write(",".join(statuses))
                     f.write("\n")
 
-
     def generate_all_csvs(self, start_time, end_time):
         filenames = os.listdir(LOG_DATA_DIR)
         num = len(filenames)
         for i in progressbar.progressbar(range(num)):
             uid = filenames[i].split(".")[0]
             self.to_csv(uid, start_time, end_time)
-
 
 def main():
     g = Grapher()
