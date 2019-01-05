@@ -92,7 +92,8 @@ class Fetcher():
                     try:
                         user_data.append(str(record['la']))
                     except:
-                        print('')
+                        print("ERROR: missing 'la' for {uid}".format(uid=uid))
+                        return
                 elif activity_key == 'p':
                     user_data.append(str(record['lat']))
                 if not 'vc' in record:

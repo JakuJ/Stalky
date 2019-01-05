@@ -30,7 +30,7 @@ class StatusHistory():
         for line in lines:
             time, fields = line.split("|")
             # Only add new times, preferring earlier records in the file. This is probably not optimal since later records seem to be more likely to be LATs, but oh well gotta break a few algorithmic contraints to make a BILLION dollars.
-            if time not in seen_times:
+            if time not in seen_times and time != '-1':
                 seen_times.add(time)
                 status_obj = status.Status(int(float(time)), fields)
                 activity.append(status_obj)

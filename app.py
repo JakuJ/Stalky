@@ -64,7 +64,7 @@ def get_data_for_query(query):
     if not os.path.exists(graph.CSV_OUTPUT_DIR):
         os.makedirs(graph.CSV_OUTPUT_DIR)
 
-    for name in pd.read_json(NAME_FILE).loc[:, 'name']:
+    for name in pd.read_json(NAME_FILE).loc[:, 'profile_name']:
         if query in name:
             uname = name
             break
