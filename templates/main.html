@@ -14,9 +14,6 @@
 
     <svg id="chart" style="width:100%; height:900px;"></svg>
 
-    <p> Click and drag the lower mini-graph to pan and zoom!</p>
-    <p> You can also click the coloured bubbles at the top to hide lines.</p>
-
     <style>
         .nvd3 g.nv-groups path.nv-line {
               stroke-width: 2px;
@@ -34,7 +31,13 @@
             e.preventDefault();
             var query = $("#query-input").val();
 
-            var statuses = ["status", "vc_0", "vc_74", "vc_8", "vc_10"];
+            var statuses = [
+                'active',
+                'vc_0',
+                'vc_74',
+                'vc_8',
+                'vc_10',
+            ]
 
             d3.csv(`data/${query}`, (error, data) => {
                 if (error)
@@ -49,46 +52,40 @@
                         .y(d => d.y);
 
                     var graphData = [{
-                            key: "status",
+                            key: "General Activity",
                             values: []
                         },
                         {
-                            key: "vc_0",
+                            key: "Web Status",
                             values: []
                         },
                         {
-                            key: "vc_74",
+                            key: "Messenger Status",
                             values: []
                         },
                         {
-                            key: "vc_8",
+                            key: "FB App Status",
                             values: []
                         },
                         {
-                            key: "vc_10",
+                            key: "Other Status",
                             values: []
                         },
                     ];
-                    var dpc = 0;
+
                     data.forEach(d => {
-                        for (var index in statuses) {
-                            graphData[index]["values"].push({
+                        for (let i in statuses) {
+                            graphData[i]["values"].push({
                                 // Multiply by 1000 to get to millis okay then js.
                                 x: new Date(Number(d["time"]) * 1000),
-                                y: d[statuses[index]]
+                                y: d[statuses[i]]
                             });
                         }
-                        dpc++;
                     });
-
-                    console.log('Data points: ' + dpc);
 
                     chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
                     chart.x2Axis.tickFormat(d => d3.time.format('%x')(new Date(d)));
 
-                    var statusTypes = ["offline", "invisible", "idle", "active"];
-
-                    chart.yAxis.tickFormat(val => statusTypes[val]);
                     chart.y2Axis.tickFormat(d3.format(',.2f'));
 
                     d3.select("#chart")

@@ -1,11 +1,11 @@
 
 import datetime
 import os
-import history
 import fbapi
-import status
 import pandas as pd
 import progressbar
+import json
+import time
 
 LOG_DATA_DIR = "log"
 CSV_OUTPUT_DIR = "generated_graphs/csv"
@@ -15,41 +15,52 @@ UTC_OFFSET = 1
 ONE_DAY_SECONDS = 60 * 60 * 24
 
 class Grapher():
-
     def __init__(self):
         if not os.path.exists(CSV_OUTPUT_DIR):
             os.makedirs(CSV_OUTPUT_DIR)
-        
         self.names = pd.read_json(NAME_FILE)
+
+    def encode_type(self, act_type):
+        mapping = {
+            None: '0',
+            'a2': '1',
+            'p0': '2',
+            'p2': '3'
+        }
+        return mapping[act_type]
 
     def to_csv(self, uid, start_time, end_time):
 
-        # The user's history.
-        status_history = history.StatusHistory(uid)
-
-        # Their Facebook username.
+        # The users's facebook profile name
         uname = fbapi.get_user_name(int(uid))
+        
+        # The user's history.
+        with open("{dir}/{uid}.txt".format(dir=LOG_DATA_DIR, uid=uid), 'r') as f:
+            lines = map(str.strip, f.readlines())
 
-        # Generate a CSV from the multiple linear timeseries
+        lines = sorted(list(lines), key=lambda line: json.loads(line)['time'])
+            
+        # Generate CSV file for plotting data
         with open("generated_graphs/csv/{uname}.csv".format(uname=uname), "w") as f:
+            f.write("time,active,vc_0,vc_8,vc_10,vc_74,type\n")
 
-            f.write("time,")
-            f.write(",".join(status.Status.statuses))
-            f.write("\n")
-
-            # TODO preprocess sort and splice this instead of linear search.
+            # TODO preprocess sort and splice this instead of linear search
             seen_times = set()
-            for data_point in status_history.activity:
-                statuses = [str(data_point._status[status_type]) for status_type in status.Status.statuses]
-                # ignore offline statuses inserted by fetcher if at the same time as last seen
-                if data_point.time in seen_times and statuses == ['1', '1', '1', '1', '1']:
+            for line in lines:
+                data = json.loads(line)
+
+                statuses = ['1' if data['vc'] == i else '0' for i in [0, 8, 10, 74]]
+                statuses.insert(0, str(int(data['active'])))
+                statuses.append(self.encode_type(data['type']))
+
+                # ! Ignore already seen times
+                if data['time'] in seen_times:
                     continue
-                elif start_time < data_point.time < end_time:
-                    seen_times.add(data_point.time)
+                elif start_time < data['time'] < end_time:
+                    seen_times.add(data['time'])
                     # Write the time.
-                    f.write(str(data_point.time) + ",")
-                    # Write the various statuses.
-                    # Sample line: <time>,3,1,3,1,1
+                    f.write(str(data['time']) + ",")
+                    # Write statuses
                     f.write(",".join(statuses))
                     f.write("\n")
 
@@ -62,9 +73,8 @@ class Grapher():
 
 def main():
     g = Grapher()
+    now = time.time()
 
-    now = history.StatusHistory.START_TIME
-    # Graph the last three days by default, but you can do ~whatever you believe you cannnnn~
     print("Graphing all data")
     g.generate_all_csvs(start_time=now - 3 * ONE_DAY_SECONDS, end_time=now)
     print("All done")
