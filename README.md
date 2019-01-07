@@ -1,47 +1,54 @@
 Stalky
-=====
-
-Um hello I guess you're here because you want to look at the code for this or run it yourself.
-
-The code is up there ^^^^ so I guess here's how you run it yourself.
+============
 
 What is this?
-=============
-Oh, reading [the blog post](https://defaultnamehere.tumblr.com/post/139351766005/graphing-when-your-facebook-friends-are-awake) would really make that more clear.
+-------------
+A complete remake of a (long forgotten ?) project by [Alexander Hogue](https://github.com/defaultnamehere/zzzzz).
+Read [his blog post](https://mango.pdf.zone/graphing-when-your-facebook-friends-are-awake) to get an idea of what this is.
+
+Why is this?
+------------
+
+As a student with the circadian rhythm probably completely out of tune, I got inspired to check whether my other student friends go to sleep at reasonable times.
+
+Looking for an idea I stumbled upon [this repository](https://github.com/defaultnamehere/zzzzz), but Facebook changed the API long ago, so I decided to use it as a starting point in making a new tool.
+
+ There is probably a correlation between having good sleep habits and getting good grades, so who knows what data science can be applied to such data?
 
 Installation
 -----------
 
-Just run
-```pip install -r requirements.txt```
-
-(virtualenv is for suckers right now)
+Run 
+```bash
+make install
+```
 
 You'll also need to supply some way of authenticating yourself to Facebook.
+Do this by creating a SECRETS.json file with the following fields:
 
-Do this by creating a SECRETS.txt file with the following lines:
-
+```json
+{
+    "uid": "Your Facebook user id",
+    "cookie": "Your Facebook cookie",
+    "client_id": "Your Facebook client id"
+}
 ```
-uid=<Contains your Facebook user id>
-cookie=<Contains your Facebook cookie>
-client_id=<Contains your Facebook client id. Find it by inspecting the GET parameters sent when your browser requests `facebook.com/pull` using your browser's dev tools.>
-excludes=<Contains your facebook friends ids which you want to exclude (optional)>
+
+You can find your FB client ID by inspecting the GET parameters sent when your browser requests `facebook.com/pull` using your browser's dev tools.
+
+Gathering data
+--------------
+
+```bash
+make fetcher
 ```
 
-Download some data
-------------------
-
-```python fetcher.py```
-
-This will run indefinitely and create data in "log".
-Depending on the number of Facebook friends you have, and how active they are, you can expect around 50-100MB/day to be written to disk.
+This will run the fetcher script indefinitely (restarting on crashes), creating data in "log". You can for example host this on a microcomputer running 24/7.
+Depending on the number of Facebook friends you have, and how active they are, you can expect around 20 - 40 MB per day to be written to disk.
 
 Make some graphs
 ----------------
 
-1. Run `python graph.py` to convert all the raw log data into CSVs
-2. Run `python app.py` to start the 100% CSS-free "webapp"
-3. Go to `http://localhost:5000` to view the ultra-minimal "webapp"
-4. Paste the Facebook user id that you want to graph into the box.
-
-You did it!
+1. Run `make server` to start the 100% CSS-free "webapp"
+2. Go to <http://localhost:5001> to view the ultra-minimal "webapp"
+3. Search by FB User Name a user whose activity you want to graph into the box.
