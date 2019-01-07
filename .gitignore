@@ -1,5 +1,5 @@
 *~
-SECRETS.txt
+SECRETS.json
 .*.swp
 *.pyc
 generated_graphs/

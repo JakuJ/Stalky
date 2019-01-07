@@ -76,7 +76,7 @@ def main():
     now = time.time()
 
     print("Graphing all data")
-    g.generate_all_csvs(start_time=now - 3 * ONE_DAY_SECONDS, end_time=now)
+    g.generate_all_csvs(start_time=now - ONE_DAY_SECONDS, end_time=now)
     print("All done")
 
 if __name__ == '__main__':

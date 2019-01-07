@@ -1,14 +1,22 @@
-.PHONY: install server rename sync 
+USER=***REMOVED***
+SERVER=***REMOVED***
+HTTP_PORT=5001
+SSH_PORT=22
+
+.PHONY: install fetcher server rename sync 
 
 install:
 	pip3 install -r dependencies.txt
 
+fetcher:
+	until python3 fetcher.py; do echo "Fetcher crashed with exit code $?.  Respawning.." >&2; sleep 1; done
+
 server:
 	python3 update_names.py
-	gunicorn -w 2 --log-level debug --bind 0.0.0.0:5001 wsgi
+	gunicorn -w 2 --log-level debug --bind 0.0.0.0:${HTTP_PORT} wsgi
 
 sync:
-	rsync --exclude='.git' --exclude='log' --exclude='generated_graphs' --exclude='fetcher_log.txt' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh=ssh -aruzhvS . ***REMOVED***@***REMOVED***:~/zzzzz
+	rsync --delete --exclude='names_storage.json' --exclude='.git' --exclude='log' --exclude='log_backup' --exclude='generated_graphs' --exclude='fetcher_log.txt' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh="ssh -p ${SSH_PORT}" -aruzhvS . ${USER}@${SERVER}:~/zzzzz
 
 backup:
-	rsync --exclude='generated_graphs' --exclude='.git' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh=ssh -aruzhvS ***REMOVED***@***REMOVED***:~/zzzzz ..
+	rsync --exclude='generated_graphs' --exclude='.git' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh="ssh -p ${SSH_PORT}" -aruzhvS ${USER}@${SERVER}:~/zzzzz ..

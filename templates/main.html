@@ -5,18 +5,36 @@
     <meta charset="utf-8">
 </head>
 
-<body>
+<body class='with-3d-shadow with-transitions'>
     <form id="query-form" method="POST" action="#">
         <label for="query-input">FB profile name</label>
         <input id="query-input" type="text"> </input>
         <input type="submit"></input>
     </form>
 
-    <svg id="chart" style="width:100%; height:900px;"></svg>
+    <div id="chart">
+        <svg></svg>
+    </div>
 
     <style>
+        text {
+            font: 12px sans-serif;
+        }
+        html, body, #chart, svg{
+            margin: 0 auto;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+        #chart{
+            width: 95%;
+        }
+        svg {
+            display: block;
+        }
+
         .nvd3 g.nv-groups path.nv-line {
-              stroke-width: 2px;
+              stroke-width: 1px;
         }
     </style>
 
@@ -33,10 +51,11 @@
 
             var statuses = [
                 'active',
-                'vc_0',
                 'vc_74',
+                'vc_0',
                 'vc_8',
                 'vc_10',
+                'type',
             ]
 
             d3.csv(`data/${query}`, (error, data) => {
@@ -45,22 +64,22 @@
 
                 nv.addGraph(() => {
 
-                    var chart = nv.models.lineWithFocusChart()
-                        .width(1400)
-                        .height(800)
+                    var chart = nv.models.multiChart()
                         .x(d => d.x)
-                        .y(d => d.y);
+                        .y(d => d.y)
+                        .margin({left: 50, right: 50})
+                        .color(d3.scale.category10().range());
 
-                    var graphData = [{
+                    var activityData = [{
                             key: "General Activity",
                             values: []
                         },
                         {
-                            key: "Web Status",
+                            key: "Messenger Status",
                             values: []
                         },
                         {
-                            key: "Messenger Status",
+                            key: "Web Status",
                             values: []
                         },
                         {
@@ -71,25 +90,40 @@
                             key: "Other Status",
                             values: []
                         },
+                        {
+                            key: "A/P Type",
+                            values: []
+                        }
                     ];
 
                     data.forEach(d => {
                         for (let i in statuses) {
-                            graphData[i]["values"].push({
+                            activityData[i]["values"].push({
                                 // Multiply by 1000 to get to millis okay then js.
                                 x: new Date(Number(d["time"]) * 1000),
                                 y: d[statuses[i]]
                             });
+                            activityData[i]['type'] = 'line';
+                            activityData[i]['yAxis'] = 1;
                         }
                     });
 
+                    activityData[5]['type'] = 'scatter';
+                    activityData[5]['yAxis'] = 2;
+
                     chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
-                    chart.x2Axis.tickFormat(d => d3.time.format('%x')(new Date(d)));
 
-                    chart.y2Axis.tickFormat(d3.format(',.2f'));
+                    var statusTypes = ["inactive", "active"];
+                    var statusTypes2 = ["none", "p0", "p2", "a2"];
 
-                    d3.select("#chart")
-                        .datum(graphData)
+                    chart.yAxis1.tickFormat(val => statusTypes[val]);
+                    chart.yAxis2.tickFormat(val => statusTypes2[val]);
+                    chart.yAxis1.domain([0, 1]);
+                    chart.yAxis2.domain([0, 3]);
+
+                    d3.select("#chart svg")
+                        .datum(activityData)
+                        .transition().duration(500)
                         .call(chart);
 
                     nv.utils.windowResize(chart.update);
