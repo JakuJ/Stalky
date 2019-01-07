@@ -1,6 +1,8 @@
 Stalky
 ============
 
+![](https://img.shields.io/badge/creepiness-medium-orange.svg)
+
 What is this?
 -------------
 A complete remake of a (long forgotten ?) project by [Alexander Hogue](https://github.com/defaultnamehere/zzzzz).
