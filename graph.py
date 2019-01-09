@@ -23,9 +23,10 @@ class Grapher():
     def encode_type(self, act_type):
         mapping = {
             None: '0',
-            'a2': '1',
-            'p0': '2',
-            'p2': '3'
+            'a0': '1',
+            'a2': '2',
+            'p0': '3',
+            'p2': '4'
         }
         return mapping[act_type]
 
