@@ -16,7 +16,7 @@ server:
 	gunicorn -w 2 --log-level debug --bind 0.0.0.0:${HTTP_PORT} wsgi
 
 sync:
-	rsync --delete --exclude='names_storage.json' --exclude='.git' --exclude='log' --exclude='log_backup' --exclude='generated_graphs' --exclude='fetcher_log.txt' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh="ssh -p ${SSH_PORT}" -aruzhv . ${USER}@${SERVER}:~/zzzzz
+	rsync --delete --exclude='.ipynb_checkpoints' --exclude='names_storage.json' --exclude='.git' --exclude='log' --exclude='log_backup' --exclude='generated_graphs' --exclude='fetcher_log.txt' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh="ssh -p ${SSH_PORT}" -aruzhv . ${USER}@${SERVER}:~/zzzzz
 
 backup:
 	rsync --exclude='generated_graphs' --exclude='.git' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --rsh="ssh -p ${SSH_PORT}" -aruzhv ${USER}@${SERVER}:~/zzzzz ..
