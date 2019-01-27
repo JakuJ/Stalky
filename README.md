@@ -1,12 +1,14 @@
 Stalky
 ============
-
-![](https://img.shields.io/badge/creepiness-medium-orange.svg)
+![](https://img.shields.io/github/license/JakuJ/zzzzz.svg)
+![](https://img.shields.io/github/languages/code-size/JakuJ/zzzzz.svg)
+![](https://img.shields.io/github/last-commit/JakuJ/zzzzz.svg)
+![](https://img.shields.io/badge/creepiness-passable-orange.svg)
 
 What is this?
 -------------
-A complete remake of a (long forgotten ?) project by [Alexander Hogue](https://github.com/defaultnamehere/zzzzz).
-Read [his blog post](https://mango.pdf.zone/graphing-when-your-facebook-friends-are-awake) to get an idea of what this is.
+A complete remake of a project by [Alexander Hogue](https://github.com/defaultnamehere/zzzzz).
+Read [his blog post](https://mango.pdf.zone/graphing-when-your-facebook-friends-are-awake) to get an idea of what this is or watch [his talk](https://www.youtube.com/watch?v=MkSkqMvGBuo) at PyCon Australia 2016.
 
 Why is this?
 ------------
