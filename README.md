@@ -1,6 +1,6 @@
 Stalky
 ============
-![](https://img.shields.io/github/license/JakuJ/zzzzz.svg)
+![](https://img.shields.io/badge/license-MIT-green.svg)
 ![](https://img.shields.io/github/languages/code-size/JakuJ/zzzzz.svg)
 ![](https://img.shields.io/github/last-commit/JakuJ/zzzzz.svg)
 ![](https://img.shields.io/badge/creepiness-passable-orange.svg)
