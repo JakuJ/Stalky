@@ -5,11 +5,14 @@ import graph
 from bs4 import BeautifulSoup
 
 def fetch_user_name(fbid):
-    resp = requests.get(
-        "https://www.facebook.com/app_scoped_user_id/" + str(fbid),
-        headers=Fetcher.REQUEST_HEADERS,
-        allow_redirects=True)
-    return resp.url.split("/")[-1]
+    try:
+        resp = requests.get(
+            "https://www.facebook.com/app_scoped_user_id/" + str(fbid),
+            headers=Fetcher.REQUEST_HEADERS,
+            allow_redirects=True)
+        return resp.url.split("/")[-1]
+    except:
+        return "unknown"
 
 def get_user_id(uname):
     names = pd.read_json(graph.NAME_FILE)
