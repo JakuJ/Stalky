@@ -96,7 +96,7 @@ class Fetcher():
             fbapi.insert_uid_uname(uid, uname)
         
         # Initialize files with valid CSV headers
-        filepath = "{logdir}/{uname}.csv".format(logdir=LOG_DATA_DIR, uname=uname)
+        filepath = "{logdir}/{uid}.csv".format(logdir=LOG_DATA_DIR, uid=uid)
         if not os.path.exists(filepath):
             with open(filepath, "w") as f:
                 f.write("time,active,vc_0,vc_8,vc_10,vc_74,type\n")

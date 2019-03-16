@@ -51,17 +51,17 @@ def index():
 @requires_auth
 def get_data_for_query(query):
     print('Query: "{query}"'.format(query=query))
-
-    uname = fbapi.find_user_name(query)
-
-    print('Found: {uname}'.format(uname=uname or "nothing"))
     
+    uname = fbapi.find_user_name(query)
     if not uname:
+        print("Couldn't find profile name containing:", query)
         return render_template("main.html")
     else:
-        os.system("echo 'time,active,vc_0,vc_8,vc_10,vc_74,type' > tmp.csv")
-        os.system("tail -n 2000 {path}/{uname}.csv | tail -n +2 | sort -s | uniq >> tmp.csv".format(path=LOG_DATA_DIR, uname=uname))
+        uid = fbapi.get_user_id(uname)
+        print('Found:', uid, uname)
         # TODO : Return last 3 days of data
+        os.system("echo 'time,active,vc_0,vc_8,vc_10,vc_74,type' > tmp.csv")
+        os.system("tail -n 1000 {path}/{uid}.csv | tail -n +2 | sort -s | uniq >> tmp.csv".format(path=LOG_DATA_DIR, uid=uid))
         return send_file("tmp.csv")
 
 if __name__ == '__main__':
