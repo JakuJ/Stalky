@@ -1,11 +1,10 @@
 *~
-SECRETS.json
 .*.swp
 *.pyc
-generated_graphs/
-log*/
-names_storage.json
 __pycache__/
 .vscode/
+SECRETS.json
 auth_hash.txt
-fetcher_log.txt
+data/
+names.db
+tmp.csv

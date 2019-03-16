@@ -1,22 +1,39 @@
-import argparse as ap
 import json
 import os
 import time
 import requests
-import graph
+import fbapi
+import sqlite3
 
-def get_secret(field):
+def get_secret(field: str) -> object:
     with open("SECRETS.json") as f:
         return json.load(f)[field]
 
 SLEEP_TIME = 1
+LOG_DATA_DIR = "data"
 
-# Load the secrets from file so some scrublord like me doesn't accidentally commit them to git.
 secrets = {
     'uid': get_secret('uid'),
     'cookie': get_secret('cookie'),
     'client_id': get_secret('client_id')
 }
+
+def encode_type(act_type: str) -> str:
+    mapping = {
+        None: '0',
+        'a0': '1',
+        'a2': '2',
+        'p0': '3',
+        'p2': '4'
+    }
+    return mapping[act_type]
+
+def json_to_csv(data: object) -> str:
+    statuses = ['1' if data['vc'] == i else '0' for i in [0, 8, 10, 74]]
+    statuses.insert(0, str(int(data['active'])))
+    statuses.append(encode_type(data['type']))
+
+    return str(data['time']) + "," + (",".join(statuses))
 
 class Fetcher():
     # Headers to send with every request.
@@ -31,16 +48,25 @@ class Fetcher():
         'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36'
     }
 
-    # Hey hey, Facebook puts this in front of all their JSON to prevent hijacking. But don't worry, we're ~verified secure~.
+    # Facebook puts this in front of all their JSON to prevent hijacking.
     JSON_PAYLOAD_PREFIX = "for (;;); "
 
     def __init__(self):
-        if not os.path.exists(graph.LOG_DATA_DIR):
-            os.makedirs(graph.LOG_DATA_DIR)
-        
+        # Create data directory if not already existing
+        if not os.path.exists(LOG_DATA_DIR):
+            os.makedirs(LOG_DATA_DIR)
+
+        # Create users database if not already existing
+        if not os.path.exists(fbapi.DB_PATH):
+            conn = sqlite3.connect(fbapi.DB_PATH)
+            c = conn.cursor()
+            c.execute('CREATE TABLE Users (User_ID CHAR(20), Profile_Name NVARCHAR)')
+            conn.commit()
+            conn.close()
+
         self.reset_params()
 
-    def make_request(self):
+    def make_request(self) -> object:
         # Load balancing is for chumps. Facebook can take it.
         url = "https://edge-chat.facebook.com/pull"
         response_obj = requests.get(url, params=self.params, headers=self.REQUEST_HEADERS)
@@ -53,8 +79,7 @@ class Fetcher():
                 data = raw_response[len(self.JSON_PAYLOAD_PREFIX) - 1:].strip()
                 data = json.loads(data)
             else:
-                # Didn't start with for (;;);
-                # Maybe it's unprotected JSON?
+                # Didn't start with for (;;); ... Maybe it's unprotected JSON?
                 data = json.loads(raw_response)
         except ValueError as e:
             print(str(e))
@@ -63,8 +88,20 @@ class Fetcher():
         print("Response:" + str(data))
         return data
 
-    def _log_lat(self, uid, record, activity_key):
-        with open("log/{uid}.txt".format(uid=uid), "a") as f:
+    def log_lat(self, uid: str, record: object, activity_key: str):
+        # Update names' database if necessary
+        uname = fbapi.get_user_name(uid)
+        if not uname:
+            uname = fbapi.fetch_user_name(uid)
+            fbapi.insert_uid_uname(uid, uname)
+        
+        # Initialize files with valid CSV headers
+        filepath = "{logdir}/{uname}.csv".format(logdir=LOG_DATA_DIR, uname=uname)
+        if not os.path.exists(filepath):
+            with open(filepath, "w") as f:
+                f.write("time,active,vc_0,vc_8,vc_10,vc_74,type\n")
+
+        with open(filepath, "a") as f:
             user_data = dict()
             if activity_key == 'a':
                 try:
@@ -96,17 +133,16 @@ class Fetcher():
             else:
                 user_data['type'] = None
 
-            f.write(json.dumps(user_data))
+            f.write(json_to_csv(user_data))
             f.write("\n")
 
-            # Assume the user is currently offline, since we got a lat for them. (This is guaranteed I think.)
             user_data = {
                 'time': int(time.time()),
                 'active': False,
                 'vc': None,
                 'type': None
             }
-            f.write(json.dumps(user_data))
+            f.write(json_to_csv(user_data))
             f.write("\n")
 
     def start_request(self):
@@ -133,12 +169,12 @@ class Fetcher():
                         if type(item["overlay"][key]) == dict:
                             uid = key
                             # Log the LAT in this message.
-                            self._log_lat(uid, item["overlay"][uid], 'a')
+                            self.log_lat(uid, item["overlay"][uid], 'a')
                 # This list contains the last active times (lats) of users.
                 if "buddyList" in item:
                     for uid in item["buddyList"]:
                         if "lat" in item["buddyList"][uid]:
-                            self._log_lat(uid, item["buddyList"][uid], 'p')
+                            self.log_lat(uid, item["buddyList"][uid], 'p')
 
     def reset_params(self):
         self.params = {
