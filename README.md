@@ -50,16 +50,9 @@ Depending on the number of Facebook friends you have, and how active they are, y
 
 Plotting some graphs
 ----------------
-### Displaying singular user's activity
 
 1. Run `make server` to start the visualization webapp
 2. Go to <http://localhost:5001> to view it
 3. Search by FB User Name a user whose activity you want to graph into the box.
 
 The "webapp" uses basic authentication that can be enabled by creating an `auth_hash.txt` file which contains a MD5 hash of a concatenation of valid username and password pair.
-
-### Analysing the data
-
-1. Open the *analysis.ipynb* Jupyter notebook
-1. Run first few cells to load all data from the *data* folder
-2. The following cells create an interpolated timeseries and do stuff with it, like displaying a chart of average actiity of all users (or a specific user) throughout the day, visualizing similarities between sleep patterns (2-dimensional PCA chart) and other stuff.

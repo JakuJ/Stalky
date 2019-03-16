@@ -14,8 +14,5 @@ fetcher:
 server:
 	gunicorn -w 2 --log-level debug --bind 0.0.0.0:${HTTP_PORT} wsgi
 
-sync:
-	rsync --delete --exclude='names.db' --exclude='data' --exclude='__pycache__' --exclude='.vscode' --exclude='.DS_Store' --exclude='.ipynb_checkpoints' --exclude='.git' --rsh="ssh -p ${SSH_PORT}" -aruzhv . ${USER}@${SERVER}:~/zzzzz
-
 backup:
-	rsync --rsh="ssh -p ${SSH_PORT}" -aruzhv ${USER}@${SERVER}:~/zzzzz/data .
+	rsync --rsh="ssh -p ${SSH_PORT}" -aruzhv ${USER}@${SERVER}:~/Desktop/Stalky/data .
