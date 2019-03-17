@@ -15,7 +15,7 @@ Why is this?
 
 As a student with the circadian rhythm probably completely out of tune, I thought it wuld be a fun eperiment to check whether other students struggle to go to sleep at reasonable times as well.
 
-Researching the topic of sleep pattern analysis I stumbled upon [this repository](https://github.com/defaultnamehere/zzzzz), which collects data from Facebook's internal API,  but Facebook changed the API long ago and the program didn't work, so I decided to use the repo as a starting point in making a new tool.
+Researching the topic of sleep pattern analysis I stumbled upon [this repository](https://github.com/defaultnamehere/zzzzz), which collects data from Facebook's internal API, but Facebook changed the API long ago and the program didn't work, so I decided to use the repo as a starting point in making a new tool.
 
 Installation
 -----------
@@ -46,7 +46,7 @@ make fetcher
 ```
 
 This will run the fetcher script indefinitely (restarting on crashes), creating data in "data" folder. You can for example host this on a microcomputer (e.g., Raspberry Pi) running 24/7.
-Depending on the number of Facebook friends you have, and how active they are, you can expect around 20 - 40 MB per day to be written to disk.
+Depending on the number of Facebook friends you have, and how active they are, you can expect around 3 - 6 MB per day to be written to disk.
 
 Plotting some graphs
 ----------------

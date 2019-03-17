@@ -10,30 +10,12 @@ def get_secret(field: str) -> object:
         return json.load(f)[field]
 
 SLEEP_TIME = 1
-LOG_DATA_DIR = "data"
 
 secrets = {
     'uid': get_secret('uid'),
     'cookie': get_secret('cookie'),
     'client_id': get_secret('client_id')
 }
-
-def encode_type(act_type: str) -> str:
-    mapping = {
-        None: '0',
-        'a0': '1',
-        'a2': '2',
-        'p0': '3',
-        'p2': '4'
-    }
-    return mapping[act_type]
-
-def json_to_csv(data: object) -> str:
-    statuses = ['1' if data['vc'] == i else '0' for i in [0, 8, 10, 74]]
-    statuses.insert(0, str(int(data['active'])))
-    statuses.append(encode_type(data['type']))
-
-    return str(data['time']) + "," + (",".join(statuses))
 
 class Fetcher():
     # Headers to send with every request.
@@ -52,17 +34,9 @@ class Fetcher():
     JSON_PAYLOAD_PREFIX = "for (;;); "
 
     def __init__(self):
-        # Create data directory if not already existing
-        if not os.path.exists(LOG_DATA_DIR):
-            os.makedirs(LOG_DATA_DIR)
-
-        # Create users database if not already existing
+        # Create the database if not already existing
         if not os.path.exists(fbapi.DB_PATH):
-            conn = sqlite3.connect(fbapi.DB_PATH)
-            c = conn.cursor()
-            c.execute('CREATE TABLE Users (User_ID CHAR(20), Profile_Name NVARCHAR)')
-            conn.commit()
-            conn.close()
+            fbapi.create_database()
 
         self.reset_params()
 
@@ -85,7 +59,7 @@ class Fetcher():
             print(str(e))
             return None
         
-        print("Response:" + str(data))
+        print("--- Response ---\n" + str(data))
         return data
 
     def log_lat(self, uid: str, record: object, activity_key: str):
@@ -94,56 +68,47 @@ class Fetcher():
         if not uname:
             uname = fbapi.fetch_user_name(uid)
             fbapi.insert_uid_uname(uid, uname)
+
+        user_data = dict()
+        if activity_key == 'a':
+            try:
+                user_data['Time'] = record['la']
+            except:
+                print("ERROR: missing 'la' for {uid}".format(uid=uid))
+                return
+        elif activity_key == 'p':
+            try:
+                user_data['Time'] = record['lat']
+            except:
+                print("ERROR: missing 'lat' for {uid}".format(uid=uid))
+                return
+
+        user_data['Activity'] = True
         
-        # Initialize files with valid CSV headers
-        filepath = "{logdir}/{uid}.csv".format(logdir=LOG_DATA_DIR, uid=uid)
-        if not os.path.exists(filepath):
-            with open(filepath, "w") as f:
-                f.write("time,active,vc_0,vc_8,vc_10,vc_74,type\n")
-
-        with open(filepath, "a") as f:
-            user_data = dict()
-            if activity_key == 'a':
-                try:
-                    user_data['time'] = record['la']
-                except:
-                    print("ERROR: missing 'la' for {uid}".format(uid=uid))
-                    return
-            elif activity_key == 'p':
-                try:
-                    user_data['time'] = record['lat']
-                except:
-                    print("ERROR: missing 'lat' for {uid}".format(uid=uid))
-                    return
-
-            user_data['active'] = True
-            
-            if not 'vc' in record:
-                user_data['vc'] = None
+        if not 'vc' in record:
+            user_data['VC_ID'] = None
+        else:
+            if record['vc'] in [0, 2, 8, 10, 74]:
+                user_data['VC_ID'] = record['vc']
             else:
-                if record['vc'] in [0, 8, 10, 74]: #TODO 'vc': 2
-                    user_data['vc'] = record['vc']
-                else:
-                    print('Invalid vc value: ' + str(record['vc']))
-                    user_data['vc'] = None
+                print('Invalid vc value: ' + str(record['vc']))
+                user_data['VC_ID'] = None
 
-            # Now log their current status stored sometimes in 'a' or 'p' property
-            if activity_key in record:
-                user_data['type'] = activity_key + str(record[activity_key])
-            else:
-                user_data['type'] = None
+        # Now log their current status stored sometimes in 'a' or 'p' property
+        if activity_key in record:
+            user_data['type'] = activity_key + str(record[activity_key])
+        else:
+            user_data['type'] = None
 
-            f.write(json_to_csv(user_data))
-            f.write("\n")
+        fbapi.insert_log(uid, user_data)
 
-            user_data = {
-                'time': int(time.time()),
-                'active': False,
-                'vc': None,
-                'type': None
-            }
-            f.write(json_to_csv(user_data))
-            f.write("\n")
+        user_data = {
+            'Time': int(time.time()),
+            'Activity': False,
+            'VC_ID': None,
+            'type': None
+        }
+        fbapi.insert_log(uid, user_data)
 
     def start_request(self):
         resp = self.make_request()
@@ -152,7 +117,7 @@ class Fetcher():
             self.reset_params()
             return
 
-        # We got info about which pool/sticky we should be using I think??? Something to do with load balancers?
+        # We got info about which pool/sticky we should be using? Something to do with load balancers?
         if "lb_info" in resp:
             self.params["sticky_pool"] = resp["lb_info"]["pool"]
             self.params["sticky_token"] = resp["lb_info"]["sticky"]

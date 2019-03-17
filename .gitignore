@@ -6,5 +6,6 @@ __pycache__/
 SECRETS.json
 auth_hash.txt
 data/
+data.db
 names.db
 tmp.csv

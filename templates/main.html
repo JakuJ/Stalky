@@ -49,25 +49,18 @@
             e.preventDefault();
             var query = $("#query-input").val();
 
-            var statuses = [
-                'active',
-                'vc_74',
-                'vc_0',
-                'vc_8',
-                'vc_10',
-                'type',
-            ]
-
             d3.csv(`data/${query}`, (error, data) => {
-                if (error)
+                if (error) {
                     console.error(error);
-
+                }
                 nv.addGraph(() => {
-
                     var chart = nv.models.multiChart()
                         .x(d => d.x)
                         .y(d => d.y)
-                        .margin({left: 50, right: 50})
+                        .margin({
+                            left: 50,
+                            right: 50
+                        })
                         .color(d3.scale.category10().range());
 
                     var activityData = [{
@@ -97,25 +90,38 @@
                     ];
 
                     data.forEach(d => {
-                        for (let i in statuses) {
+                        // Activity
+                        activityData[0]["values"].push({
+                            x: new Date(Number(d["Time"]) * 1000),
+                            y: d['Activity']
+                        });
+                        // VC Type
+                        vc_index = ['74', '0', '8', '10'].indexOf(d['VC_ID']);
+                        for (let i = 1; i <= 4; i++) {
                             activityData[i]["values"].push({
-                                // Multiply by 1000 to get to millis okay then js.
-                                x: new Date(Number(d["time"]) * 1000),
-                                y: d[statuses[i]]
+                                x: new Date(Number(d["Time"]) * 1000),
+                                y: (i == vc_index) ? 1 : 0
                             });
-                            activityData[i]['type'] = 'line';
-                            activityData[i]['yAxis'] = 1;
                         }
+                        // AP Type
+                        activityData[5]["values"].push({
+                            x: new Date(Number(d["Time"]) * 1000),
+                            y: d['AP_ID'] || 0
+                        });
                     });
+
+                    for (let i = 0; i <= 5; i++) {
+                        activityData[i]['type'] = 'line';
+                        activityData[i]['yAxis'] = 1;
+                    }
 
                     activityData[5]['type'] = 'scatter';
                     activityData[5]['yAxis'] = 2;
 
-                    chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
-
                     var statusTypes = ["inactive", "active"];
-                    var statusTypes2 = ["none", "p0", "p2", "a2"];
+                    var statusTypes2 = ["none", "a0", "a2", "p0", "p2"];
 
+                    chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
                     chart.yAxis1.tickFormat(val => statusTypes[val]);
                     chart.yAxis2.tickFormat(val => statusTypes2[val]);
                     chart.yAxis1.domain([0, 1]);

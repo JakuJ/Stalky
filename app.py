@@ -3,9 +3,10 @@ from functools import wraps
 import os
 import fbapi
 import hashlib
+import csv
 
 AUTH_HASH_PATH = "auth_hash.txt"
-LOG_DATA_DIR = "data"
+ONE_DAY_SECONDS = 24 * 60 * 60
 
 application = Flask('stalky')
 
@@ -59,9 +60,14 @@ def get_data_for_query(query):
     else:
         uid = fbapi.get_user_id(uname)
         print('Found:', uid, uname)
-        # TODO : Return last 3 days of data
-        os.system("echo 'time,active,vc_0,vc_8,vc_10,vc_74,type' > tmp.csv")
-        os.system("tail -n 1000 {path}/{uid}.csv | tail -n +2 | sort -s | uniq >> tmp.csv".format(path=LOG_DATA_DIR, uid=uid))
+
+        data = fbapi.get_logs(uid, 2 * ONE_DAY_SECONDS)
+
+        with open('tmp.csv', 'w') as f:
+            writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            writer.writerow(['Time', 'Activity', 'VC_ID', 'AP_ID'])
+            writer.writerows(data)
+
         return send_file("tmp.csv")
 
 if __name__ == '__main__':

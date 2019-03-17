@@ -1,0 +1,28 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE Users (
+    User_ID INTEGER PRIMARY KEY,
+    Profile_Name NVARCHAR(50)
+);
+CREATE TABLE VC_Types (
+    VC_ID INTEGER PRIMARY KEY
+);
+CREATE TABLE AP_Types (
+    AP_ID INTEGER PRIMARY KEY,
+    Character CHAR (1) NOT NULL,
+    Digit INTEGER NOT NULL
+);
+CREATE TABLE Logs (
+    Log_ID INTEGER PRIMARY KEY,
+    User_ID INTEGER NOT NULL,
+    Time INTEGER NOT NULL,
+    Activity BOOLEAN NOT NULL,
+    VC_ID INTEGER,
+    AP_ID INTEGER,
+    FOREIGN KEY(User_ID) REFERENCES Users(User_ID),
+    FOREIGN KEY(VC_ID) REFERENCES VC_Types(VC_ID),
+    FOREIGN KEY(AP_ID) REFERENCES AP_Types(AP_ID)
+);
+
+INSERT INTO VC_Types (VC_ID) VALUES (0), (2), (8), (10), (74);
+INSERT INTO AP_Types (AP_ID, Character, Digit) VALUES (1, 'a', 0), (2, 'a', 2), (3, 'p', 0), (4, 'p', 2);
