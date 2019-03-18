@@ -5,7 +5,6 @@ __pycache__/
 .vscode/
 SECRETS.json
 auth_hash.txt
-data/
 data.db
-names.db
+data_backup.db
 tmp.csv

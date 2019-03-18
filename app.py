@@ -62,12 +62,12 @@ def get_data_for_query(query):
         print('Found:', uid, uname)
 
         data = fbapi.get_logs(uid, 2 * ONE_DAY_SECONDS)
-
         with open('tmp.csv', 'w') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             writer.writerow(['Time', 'Activity', 'VC_ID', 'AP_ID'])
             writer.writerows(data)
 
+        print('Created data file, sending...')
         return send_file("tmp.csv")
 
 if __name__ == '__main__':

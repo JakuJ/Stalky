@@ -62,7 +62,7 @@ class Fetcher():
         print("--- Response ---\n" + str(data))
         return data
 
-    def log_lat(self, uid: str, record: object, activity_key: str):
+    def log_lat(self, cursor, uid: str, record: object, activity_key: str):
         # Update names' database if necessary
         uname = fbapi.get_user_name(uid)
         if not uname:
@@ -100,7 +100,7 @@ class Fetcher():
         else:
             user_data['type'] = None
 
-        fbapi.insert_log(uid, user_data)
+        fbapi.insert_log(cursor, uid, user_data)
 
         user_data = {
             'Time': int(time.time()),
@@ -108,7 +108,7 @@ class Fetcher():
             'VC_ID': None,
             'type': None
         }
-        fbapi.insert_log(uid, user_data)
+        fbapi.insert_log(cursor, uid, user_data)
 
     def start_request(self):
         resp = self.make_request()
@@ -126,20 +126,22 @@ class Fetcher():
             self.params["seq"] = resp["seq"]
 
         if "ms" in resp:
-            for item in resp["ms"]:
-                # The online/offline info we're looking for.
-                if item["type"] == "buddylist_overlay":
-                    # Find the key with all the message details, that one is the UID.
-                    for key in item["overlay"]:
-                        if type(item["overlay"][key]) == dict:
-                            uid = key
-                            # Log the LAT in this message.
-                            self.log_lat(uid, item["overlay"][uid], 'a')
-                # This list contains the last active times (lats) of users.
-                if "buddyList" in item:
-                    for uid in item["buddyList"]:
-                        if "lat" in item["buddyList"][uid]:
-                            self.log_lat(uid, item["buddyList"][uid], 'p')
+            #timeout not to throw errors on backup write lock
+            with fbapi.DBConnection(timeout=60) as cursor:
+                for item in resp["ms"]:
+                    # The online/offline info we're looking for.
+                    if item["type"] == "buddylist_overlay":
+                        # Find the key with all the message details, that one is the UID.
+                        for key in item["overlay"]:
+                            if type(item["overlay"][key]) == dict:
+                                uid = key
+                                # Log the LAT in this message.
+                                self.log_lat(cursor, uid, item["overlay"][uid], 'a')
+                    # This list contains the last active times (lats) of users.
+                    if "buddyList" in item:
+                        for uid in item["buddyList"]:
+                            if "lat" in item["buddyList"][uid]:
+                                self.log_lat(cursor, uid, item["buddyList"][uid], 'p')
 
     def reset_params(self):
         self.params = {

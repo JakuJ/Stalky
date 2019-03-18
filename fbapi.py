@@ -5,11 +5,13 @@ import sqlite3
 import os
 
 DB_PATH = "data.db"
-OLD_DB_PATH = 'names.db'
 
 class DBConnection:
-    def __init__(self):
-        self.con = sqlite3.connect(DB_PATH)
+    def __init__(self, timeout=None):
+        if timeout:
+            self.con = sqlite3.connect(DB_PATH, timeout=timeout)
+        else:
+            self.con = sqlite3.connect(DB_PATH)
 
     def __enter__(self):
         self.cursor = self.con.cursor()
@@ -34,8 +36,6 @@ def create_database():
     script = open('create_database.sql', 'r').read()
     with DBConnection() as c:
         c.executescript(script)
-        if os.path.exists(OLD_DB_PATH):
-            c.executescript("ATTACH '{path}' AS OLD; INSERT INTO Users SELECT * FROM OLD.Users;".format(path=OLD_DB_PATH))
 
 def query_database_one(query: str, args: tuple):
     with DBConnection() as c:
@@ -65,7 +65,7 @@ def insert_uid_uname(uid: str, uname: str):
         else:
             c.execute('INSERT INTO Users (User_ID, Profile_Name) VALUES (?, ?)', (uid, uname))
 
-def insert_log(uid: str, data: dict):
+def insert_log(c, uid: str, data: dict):
     mapping = {
         None: None,
         'a0': '1',
@@ -73,8 +73,7 @@ def insert_log(uid: str, data: dict):
         'p0': '3',
         'p2': '4'
     }
-    with DBConnection() as c:
-        c.execute('INSERT INTO Logs (User_ID, Time, Activity, VC_ID, AP_ID) VALUES (?, ?, ?, ?, ?)', (uid, data['Time'], data['Activity'], data['VC_ID'], mapping[data['type']]))
+    c.execute('INSERT INTO Logs (User_ID, Time, Activity, VC_ID, AP_ID) VALUES (?, ?, ?, ?, ?)', (uid, data['Time'], data['Activity'], data['VC_ID'], mapping[data['type']]))
 
 def get_logs(uid: str, timeframe: int):
     now = int(time())
