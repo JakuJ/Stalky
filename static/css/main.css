@@ -1,0 +1,36 @@
+text {
+    font: 12px sans-serif;
+}
+
+html,
+body,
+#chart,
+svg {
+    margin: 0 auto;
+    padding: 0px;
+    height: 100%;
+    width: 100%;
+}
+
+#chart {
+    width: 95%;
+}
+
+svg {
+    display: block;
+}
+
+.nvd3 g.nv-groups path.nv-line {
+    stroke-width: 1px;
+}
+
+form label {
+    margin-left: 10px;
+    font-size: 14;
+    font-family: Helvetica, Arial, sans-serif;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    vertical-align: middle;
+}

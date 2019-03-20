@@ -7,138 +7,28 @@
 
 <body class='with-3d-shadow with-transitions'>
     <form id="query-form" method="POST" action="#">
-        <label for="query-input">FB profile name</label>
-        <input id="query-input" type="text"> </input>
-        <input type="submit"></input>
+        <label for="query-input">Profile name</label>
+        <input id="query-input" type="text" required="true" />
+        <label for="query-timespan">Timespan</label>
+        <input id="query-timespan" type="number" value="2" required="true" />
+        <select name="query-unit" id="query-unit">
+            <option value="day">Days</option>
+            <option value="hour">Hours</option>
+            <option value="minute">Minutes</option>
+        </select>
+        <input id="Search" type="submit" value="Search" disabled="disabled" />
     </form>
 
     <div id="chart">
         <svg></svg>
     </div>
 
-    <style>
-        text {
-            font: 12px sans-serif;
-        }
-        html, body, #chart, svg{
-            margin: 0 auto;
-            padding: 0px;
-            height: 100%;
-            width: 100%;
-        }
-        #chart{
-            width: 95%;
-        }
-        svg {
-            display: block;
-        }
-
-        .nvd3 g.nv-groups path.nv-line {
-              stroke-width: 1px;
-        }
-    </style>
-
     <script src="../static/js/d3.min.js"></script>
-    <link href="../static/css/nv.d3.min.css" rel="stylesheet">
+    <link href="../static/css/nv.d3.min.css" rel="stylesheet" />
     <script src="../static/js/nv.d3.min.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-
-    <script type="text/javascript">
-        $("#query-form").submit(e => {
-
-            e.preventDefault();
-            var query = $("#query-input").val();
-
-            d3.csv(`data/${query}`, (error, data) => {
-                if (error) {
-                    console.error(error);
-                }
-                nv.addGraph(() => {
-                    var chart = nv.models.multiChart()
-                        .x(d => d.x)
-                        .y(d => d.y)
-                        .margin({
-                            left: 50,
-                            right: 50
-                        })
-                        .color(d3.scale.category10().range());
-
-                    var activityData = [{
-                            key: "General Activity",
-                            values: []
-                        },
-                        {
-                            key: "Messenger Status",
-                            values: []
-                        },
-                        {
-                            key: "Web Status",
-                            values: []
-                        },
-                        {
-                            key: "FB App Status",
-                            values: []
-                        },
-                        {
-                            key: "Other Status",
-                            values: []
-                        },
-                        {
-                            key: "A/P Type",
-                            values: []
-                        }
-                    ];
-
-                    data.forEach(d => {
-                        // Activity
-                        activityData[0]["values"].push({
-                            x: new Date(Number(d["Time"]) * 1000),
-                            y: d['Activity']
-                        });
-                        // VC Type
-                        vc_index = ['74', '0', '8', '10'].indexOf(d['VC_ID']);
-                        for (let i = 1; i <= 4; i++) {
-                            activityData[i]["values"].push({
-                                x: new Date(Number(d["Time"]) * 1000),
-                                y: (i == vc_index) ? 1 : 0
-                            });
-                        }
-                        // AP Type
-                        activityData[5]["values"].push({
-                            x: new Date(Number(d["Time"]) * 1000),
-                            y: d['AP_ID'] || 0
-                        });
-                    });
-
-                    for (let i = 0; i <= 5; i++) {
-                        activityData[i]['type'] = 'line';
-                        activityData[i]['yAxis'] = 1;
-                    }
-
-                    activityData[5]['type'] = 'scatter';
-                    activityData[5]['yAxis'] = 2;
-
-                    var statusTypes = ["inactive", "active"];
-                    var statusTypes2 = ["none", "a0", "a2", "p0", "p2"];
-
-                    chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
-                    chart.yAxis1.tickFormat(val => statusTypes[val]);
-                    chart.yAxis2.tickFormat(val => statusTypes2[val]);
-                    chart.yAxis1.domain([0, 1]);
-                    chart.yAxis2.domain([0, 3]);
-
-                    d3.select("#chart svg")
-                        .datum(activityData)
-                        .transition().duration(500)
-                        .call(chart);
-
-                    nv.utils.windowResize(chart.update);
-
-                    return chart;
-                });
-            });
-        });
-    </script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <script type="text/javascript" src="../static/js/main.js"></script>
 </body>
 
 </html>

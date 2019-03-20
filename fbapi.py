@@ -44,11 +44,6 @@ def query_database_one(query: str, args: tuple):
         return data[0]
     return None
 
-def query_database_all(query: str, args: tuple):
-    with DBConnection() as c:
-        data = c.execute(query, args).fetchall()
-    return data
-
 def get_user_id(uname: str) -> str:
     return query_database_one('SELECT User_ID from Users where Profile_Name = ?', (uname,))
 
@@ -77,4 +72,6 @@ def insert_log(c, uid: str, data: dict):
 
 def get_logs(uid: str, timeframe: int):
     now = int(time())
-    return query_database_all('SELECT Time, Activity, VC_ID, AP_ID FROM Logs where User_ID = ? and Time >= ? ORDER BY Time ASC', (uid, now - timeframe))
+    with DBConnection(timeout=20) as c:
+        data = c.execute('SELECT Time, Activity, VC_ID, AP_ID FROM Logs where User_ID = ? and Time >= ? ORDER BY Time ASC', (uid, now - timeframe)).fetchall()
+    return data

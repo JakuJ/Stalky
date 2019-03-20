@@ -6,7 +6,6 @@ import hashlib
 import csv
 
 AUTH_HASH_PATH = "auth_hash.txt"
-ONE_DAY_SECONDS = 24 * 60 * 60
 
 application = Flask('stalky')
 
@@ -48,11 +47,10 @@ def after_request(response):
 def index():
     return render_template("main.html")
 
-@application.route('/data/<string:query>')
+@application.route('/query/<string:query>/<int:timespan>/<string:unit>')
 @requires_auth
-def get_data_for_query(query):
+def get_data_for_query(query, timespan, unit):
     print('Query: "{query}"'.format(query=query))
-    
     uname = fbapi.find_user_name(query)
     if not uname:
         print("Couldn't find profile name containing:", query)
@@ -61,7 +59,13 @@ def get_data_for_query(query):
         uid = fbapi.get_user_id(uname)
         print('Found:', uid, uname)
 
-        data = fbapi.get_logs(uid, 2 * ONE_DAY_SECONDS)
+        timespan_seconds = {
+            'day': 24 * 60 * 60,
+            'hour': 60 * 60,
+            'minute': 60
+        }
+
+        data = fbapi.get_logs(uid, timespan * timespan_seconds[unit])
         with open('tmp.csv', 'w') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             writer.writerow(['Time', 'Activity', 'VC_ID', 'AP_ID'])
