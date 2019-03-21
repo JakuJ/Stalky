@@ -16,100 +16,59 @@ $('#query-form > input').keyup(function () {
     }
 });
 
-/* Plot data received from the server */
-$("#query-form").submit(e => {
+/* Only display time on the legend when mouse over */
+function legendFormatter(data) {
+    if (data.x == null) {
+        return '<br>' + data.series.map(function (series) {
+            return series.dashHTML + ' ' + series.labelHTML
+        }).join('<br>');
+    }
+    var html = this.getLabels()[0] + ': ' + data.xHTML;
+    return html;
+}
 
-    e.preventDefault();
-    var query = $("#query-input").val();
-    var timespan = $("#query-timespan").val();
-    var unit = $("#query-unit").val();
+/* Add grey background to Saturdays and Sundays */
+function highlightWeekends(canvas, area, g) {
 
-    d3.csv(`query/${query}/${timespan}/${unit}`, (error, data) => {
-        if (error) {
-            console.error(error);
+    canvas.fillStyle = "#DDDDDD";
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    var min_data_x = g.getValue(0, 0);
+    var max_data_x = g.getValue(g.numRows() - 1, 0);
+
+    function highlight_period(x_start, x_end) {
+        if (x_start < min_data_x) {
+            x_start = min_data_x;
         }
-        nv.addGraph(() => {
-            var chart = nv.models.multiChart()
-                .x(d => d.x)
-                .y(d => d.y)
-                .margin({
-                    left: 50,
-                    right: 50
-                })
-                .color(d3.scale.category10().range());
+        if (x_end > max_data_x) {
+            x_end = max_data_x;
+        }
+        var canvas_left_x = g.toDomXCoord(x_start);
+        var canvas_right_x = g.toDomXCoord(x_end);
+        var canvas_width = canvas_right_x - canvas_left_x;
+        canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
+    }
+    var timezone = new Date().getTimezoneOffset() * 60 * 1000;
 
-            var activityData = [{
-                    key: "General Activity",
-                    values: []
-                },
-                {
-                    key: "Messenger Status",
-                    values: []
-                },
-                {
-                    key: "Web Status",
-                    values: []
-                },
-                {
-                    key: "FB App Status",
-                    values: []
-                },
-                {
-                    key: "Other Status",
-                    values: []
-                },
-                {
-                    key: "AP Type",
-                    values: []
-                }
-            ];
+    var d = new Date(min_data_x);
+    var dow = d.getDay();
 
-            data.forEach(d => {
-                // Activity
-                activityData[0]["values"].push({
-                    x: new Date(Number(d["Time"]) * 1000),
-                    y: d['Activity']
-                });
-                // VC Type
-                let vc_index = ['74', '0', '8', '10'].indexOf(d['VC_ID']);
-                for (let i = 1; i <= 4; i++) {
-                    activityData[i]["values"].push({
-                        x: new Date(Number(d["Time"]) * 1000),
-                        y: (i == vc_index) ? 1 : 0
-                    });
-                }
-                // AP Type
-                activityData[5]["values"].push({
-                    x: new Date(Number(d["Time"]) * 1000),
-                    y: d['AP_ID'] || 0
-                });
-            });
+    var w = min_data_x;
+    if (dow === 0) {
+        highlight_period(w, w + oneDay - (w % oneDay) + timezone);
+    }
+    w = w + oneDay - (w % oneDay) + timezone;
 
-            for (let i = 0; i <= 5; i++) {
-                activityData[i]['type'] = 'line';
-                activityData[i]['yAxis'] = 1;
-            }
+    while (dow != 6) {
+        w += oneDay;
+        d = new Date(w);
+        dow = d.getDay();
+    }
 
-            activityData[5]['type'] = 'scatter';
-            activityData[5]['yAxis'] = 2;
-            activityData[5]['disabled'] = true;
-
-            var statusTypes = ["inactive", "active"];
-            var statusTypes2 = ["none", "a0", "a2", "p0", "p2"];
-
-            chart.xAxis.tickFormat(d => d3.time.format('%X')(new Date(d)));
-            chart.yAxis1.tickFormat(val => statusTypes[val]);
-            chart.yAxis2.tickFormat(val => statusTypes2[val]);
-            chart.yAxis1.domain([0, 1]);
-            chart.yAxis2.domain([0, 4]);
-
-            d3.select("#chart svg")
-                .datum(activityData)
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
-        });
-    });
-});
+    while (w < max_data_x) {
+        var start_x_highlight = w;
+        var end_x_highlight = w + 2 * oneDay;
+        highlight_period(start_x_highlight, end_x_highlight);
+        w += 7 * oneDay;
+    }
+}

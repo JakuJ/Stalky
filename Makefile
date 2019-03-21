@@ -15,5 +15,5 @@ server:
 	gunicorn -w 2 --log-level debug --bind 0.0.0.0:${HTTP_PORT} wsgi
 
 backup:
-	rsync --rsh="ssh -p ${SSH_PORT}" -aruzhv ${USER}@${SERVER}:~/Desktop/Stalky/data_backup.db .
+	rsync --progress --rsh="ssh -p ${SSH_PORT}" -aruzhv ${USER}@${SERVER}:~/Desktop/Stalky/data_backup.db .
 	mv data_backup.db data.db

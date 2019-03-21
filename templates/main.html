@@ -10,7 +10,7 @@
         <label for="query-input">Profile name</label>
         <input id="query-input" type="text" required="true" />
         <label for="query-timespan">Timespan</label>
-        <input id="query-timespan" type="number" value="2" required="true" />
+        <input id="query-timespan" type="number" value="3" required="true" />
         <select name="query-unit" id="query-unit">
             <option value="day">Days</option>
             <option value="hour">Hours</option>
@@ -19,16 +19,58 @@
         <input id="Search" type="submit" value="Search" disabled="disabled" />
     </form>
 
-    <div id="chart">
-        <svg></svg>
+    <div id="graphDiv">
     </div>
 
-    <script src="../static/js/d3.min.js"></script>
-    <link href="../static/css/nv.d3.min.css" rel="stylesheet" />
-    <script src="../static/js/nv.d3.min.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <script src="../static/js/dygraph.min.js"></script>
+    <link rel="stylesheet" href="../static/css/dygraph.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" />
     <script type="text/javascript" src="../static/js/main.js"></script>
+    <script>
+        /* Plot data received from the server */
+        $("#query-form").submit(e => {
+
+            e.preventDefault();
+            var query = $("#query-input").val();
+            var timespan = $("#query-timespan").val();
+            var unit = $("#query-unit").val();
+
+            new Dygraph(document.getElementById("graphDiv"),
+                `query/${query}/${timespan}/${unit}`, {
+                    title: 'Facebook Activity',
+                    xlabel: 'Time',
+                    ylabel: 'Activity Types',
+                    colors: ['blue', 'orange', 'green', 'red', 'black'],
+                    legend: 'always',
+                    legendFormatter: legendFormatter,
+                    underlayCallback: highlightWeekends,
+                    axes: {
+                        y: {
+                            valueRange: [0, 1.05],
+                            ticker: (min, max, pixels, opts, dygraph, vals) => [{
+                                v: 0.1,
+                                label: "Activity"
+                            }, {
+                                v: 0.3,
+                                label: "Messenger"
+                            }, {
+                                v: 0.5,
+                                label: "App"
+                            }, {
+                                v: 0.7,
+                                label: "Web"
+                            }, {
+                                v: 0.9,
+                                label: "Other"
+                            }]
+
+                        }
+                    }
+                }
+            );
+        });
+    </script>
 </body>
 
 </html>

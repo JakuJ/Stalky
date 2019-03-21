@@ -3,25 +3,22 @@ text {
 }
 
 html,
-body,
-#chart,
-svg {
+body {
     margin: 0 auto;
     padding: 0px;
     height: 100%;
     width: 100%;
 }
 
-#chart {
+#graphDiv {
     width: 95%;
+    height: 90%;
+    position: relative;
+    margin: 2%;
 }
 
-svg {
-    display: block;
-}
-
-.nvd3 g.nv-groups path.nv-line {
-    stroke-width: 1px;
+div.dygraph-axis-label-y{
+    font-size: 80%;
 }
 
 form label {

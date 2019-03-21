@@ -72,6 +72,23 @@ def insert_log(c, uid: str, data: dict):
 
 def get_logs(uid: str, timeframe: int):
     now = int(time())
+    query="""
+        SELECT
+            datetime(Time, "unixepoch", "localtime"),
+            CASE WHEN VC_ID IS NULL AND Activity = 1 THEN 0.2 ELSE 0 END,
+            CASE WHEN VC_ID = 74 THEN 0.4 ELSE 0.2 END,
+            CASE WHEN VC_ID = 8 THEN 0.6 ELSE 0.4 END,
+            CASE WHEN VC_ID = 0 THEN 0.8 ELSE 0.6 END,
+            CASE WHEN VC_ID = 10 THEN 1 ELSE 0.8 END
+        FROM 
+            Logs 
+        WHERE 
+            User_ID = ?
+            AND
+            Time >= ? 
+        ORDER BY
+            Time ASC
+    """
     with DBConnection(timeout=20) as c:
-        data = c.execute('SELECT Time, Activity, VC_ID, AP_ID FROM Logs where User_ID = ? and Time >= ? ORDER BY Time ASC', (uid, now - timeframe)).fetchall()
+        data = c.execute(query, (uid, now - timeframe)).fetchall()
     return data

@@ -68,7 +68,7 @@ def get_data_for_query(query, timespan, unit):
         data = fbapi.get_logs(uid, timespan * timespan_seconds[unit])
         with open('tmp.csv', 'w') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            writer.writerow(['Time', 'Activity', 'VC_ID', 'AP_ID'])
+            writer.writerow(['Time', 'Activity', 'Messenger Status', 'FB App Status', 'Web Status', 'Other Status'])
             writer.writerows(data)
 
         print('Created data file, sending...')
