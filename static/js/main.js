@@ -30,7 +30,7 @@ function legendFormatter(data) {
 /* Add grey background to Saturdays and Sundays */
 function highlightWeekends(canvas, area, g) {
 
-    canvas.fillStyle = "#DDDDDD";
+    canvas.fillStyle = "rgba(0, 0, 0, 0.2)";
     const oneDay = 24 * 60 * 60 * 1000;
 
     var min_data_x = g.getValue(0, 0);
