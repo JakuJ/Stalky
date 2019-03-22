@@ -45,7 +45,7 @@ Gathering data
 make fetcher
 ```
 
-This will run the fetcher script indefinitely (restarting on crashes), creating data in "data" folder. You can for example host this on a microcomputer (e.g., Raspberry Pi) running 24/7.
+This will run the fetcher script indefinitely (restarting on crashes), creating data in a SQLite database (`data.db` by default). You can for example host this on a microcomputer (e.g., Raspberry Pi) running 24/7.
 Depending on the number of Facebook friends you have, and how active they are, you can expect around 3 - 6 MB per day to be written to disk.
 
 Plotting some graphs
@@ -53,6 +53,8 @@ Plotting some graphs
 
 1. Run `make server` to start the visualization webapp
 2. Go to <http://localhost:5001> to view it
-3. Search by FB User Name a user whose activity you want to graph into the box.
+3. Submit the FB User Name of a user whose activity you want to graph and the time span.
+
+The graph library used is blazing fast, allowing you to graph months of data, zoom in (select a segment of the graph) and out (double click on the graph) and pan around (Shift + Click).
 
 The "webapp" uses basic authentication that can be enabled by creating an `auth_hash.txt` file which contains a MD5 hash of a concatenation of valid username and password pair.

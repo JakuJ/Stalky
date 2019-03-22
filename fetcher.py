@@ -5,11 +5,14 @@ import requests
 import fbapi
 import sqlite3
 
-def get_secret(field: str) -> object:
-    with open("SECRETS.json") as f:
-        return json.load(f)[field]
-
+SECRETS_PATH = "SECRETS.json"
 SLEEP_TIME = 1
+VC_TYPES = [0, 2, 8, 10, 74]
+
+def get_secret(field: str) -> object:
+    """Read a field from the secrets file"""
+    with open(SECRETS_PATH) as f:
+        return json.load(f)[field]
 
 secrets = {
     'uid': get_secret('uid'),
@@ -18,7 +21,7 @@ secrets = {
 }
 
 class Fetcher():
-    # Headers to send with every request.
+    """Handles data fetching and logging"""
     REQUEST_HEADERS = {
         'accept': '*/*',
         'accept-encoding': 'gzip, deflate, sdch',
@@ -34,14 +37,12 @@ class Fetcher():
     JSON_PAYLOAD_PREFIX = "for (;;); "
 
     def __init__(self):
-        # Create the database if not already existing
+        self.reset_params()
         if not os.path.exists(fbapi.DB_PATH):
             fbapi.create_database()
 
-        self.reset_params()
-
     def make_request(self) -> object:
-        # Load balancing is for chumps. Facebook can take it.
+        """Make a request to Facebook's internal API"""
         url = "https://edge-chat.facebook.com/pull"
         response_obj = requests.get(url, params=self.params, headers=self.REQUEST_HEADERS)
 
@@ -53,7 +54,6 @@ class Fetcher():
                 data = raw_response[len(self.JSON_PAYLOAD_PREFIX) - 1:].strip()
                 data = json.loads(data)
             else:
-                # Didn't start with for (;;); ... Maybe it's unprotected JSON?
                 data = json.loads(raw_response)
         except ValueError as e:
             print(str(e))
@@ -63,12 +63,15 @@ class Fetcher():
         return data
 
     def log_lat(self, cursor, uid: str, record: object, activity_key: str):
-        # Update names' database if necessary
+        """Log received information to the database"""
+        
+        # Update user's info if necessary
         uname = fbapi.get_user_name(uid)
         if not uname:
             uname = fbapi.fetch_user_name(uid)
             fbapi.insert_uid_uname(uid, uname)
 
+        # Extract last active time
         user_data = dict()
         if activity_key == 'a':
             try:
@@ -85,23 +88,25 @@ class Fetcher():
 
         user_data['Activity'] = True
         
+        # Extract activity type info
         if not 'vc' in record:
             user_data['VC_ID'] = None
         else:
-            if record['vc'] in [0, 2, 8, 10, 74]:
+            if record['vc'] in VC_TYPES:
                 user_data['VC_ID'] = record['vc']
             else:
                 print('Invalid vc value: ' + str(record['vc']))
                 user_data['VC_ID'] = None
 
-        # Now log their current status stored sometimes in 'a' or 'p' property
+        # Extract current A/P property
         if activity_key in record:
             user_data['type'] = activity_key + str(record[activity_key])
         else:
             user_data['type'] = None
 
         fbapi.insert_log(cursor, uid, user_data)
-
+        
+        # Assume inactivity at request time
         user_data = {
             'Time': int(time.time()),
             'Activity': False,
@@ -111,33 +116,34 @@ class Fetcher():
         fbapi.insert_log(cursor, uid, user_data)
 
     def start_request(self):
+        """Query the internal API and log all data"""
         resp = self.make_request()
         if resp is None:
             print("Got error from request, restarting...")
             self.reset_params()
             return
 
-        # We got info about which pool/sticky we should be using? Something to do with load balancers?
+        # Info about which pool/sticky we should be using. Probably something to do with the load balancers.
         if "lb_info" in resp:
             self.params["sticky_pool"] = resp["lb_info"]["pool"]
             self.params["sticky_token"] = resp["lb_info"]["sticky"]
 
+        # Request sequence number
         if "seq" in resp:
             self.params["seq"] = resp["seq"]
 
+        # The response message
         if "ms" in resp:
-            #timeout not to throw errors on backup write lock
+            # Timeout for handling database write locks
             with fbapi.DBConnection(timeout=60) as cursor:
                 for item in resp["ms"]:
-                    # The online/offline info we're looking for.
+                    # The online/offline info
                     if item["type"] == "buddylist_overlay":
-                        # Find the key with all the message details, that one is the UID.
+                        # The key with all the message details is the UID
                         for key in item["overlay"]:
                             if type(item["overlay"][key]) == dict:
-                                uid = key
-                                # Log the LAT in this message.
-                                self.log_lat(cursor, uid, item["overlay"][uid], 'a')
-                    # This list contains the last active times (lats) of users.
+                                self.log_lat(cursor, key, item["overlay"][key], 'a')
+                    # List containing user last active times
                     if "buddyList" in item:
                         for uid in item["buddyList"]:
                             if "lat" in item["buddyList"][uid]:
@@ -145,36 +151,27 @@ class Fetcher():
 
     def reset_params(self):
         self.params = {
-            # No idea what this is.
+            # ? No idea what these are
             'cap': '8',
-            # No idea what this is.
             'cb': '2qfi',
-            # No idea what this is.
             'channel': 'p_' + secrets['uid'],
+            'isq': '173180',
+            'partition': '-2',
+            'qp': 'y',
+            'wtc': '171%2C170%2C0.000%2C171%2C171',
+            # ? My online status
+            'idle': '0',
+            # ? Messages received so far
+            'msgs_recv': '0',
+            # ? Set starting sequence number to 0
+            'seq': '0',
             'clientid': secrets['client_id'],
             'format': 'json',
-            # Is this my online status?
-            'idle': '0',
-            # No idea what this is.
-            'isq': '173180',
-            # Whether to stream the HTTP GET request. We don't want to!
-            # 'mode': 'stream',
-            # Is this how many messages we have got from Facebook in this session so far?
-            # Previous value: 26
-            'msgs_recv': '0',
-            # No idea what this is.
-            'partition': '-2',
-            # No idea what this is.
-            'qp': 'y',
-            # Set starting sequence number to 0.
-            # This number doesn't seem to be necessary for getting the /pull content, since setting it to 0 every time still gets everything as far as I can tell. Maybe it's used for #webscale reasons.
-            'seq': '0',
             'state': 'active',
             'sticky_pool': 'atn2c06_chat-proxy',
             'sticky_token': '0',
             'uid': secrets['uid'],
-            'viewer_uid': secrets['uid'],
-            'wtc': '171%2C170%2C0.000%2C171%2C171'
+            'viewer_uid': secrets['uid']
         }
 
 if __name__ == "__main__":
