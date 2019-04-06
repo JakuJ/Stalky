@@ -5,6 +5,8 @@ Stalky
 ![](https://img.shields.io/github/last-commit/JakuJ/zzzzz.svg)
 ![](https://img.shields.io/badge/creepiness-passable-orange.svg)
 
+<span style="color: orange;">Scroll down for collected data insights!</span>
+
 What is this?
 -------------
 A complete remake of a project by [Alexander Hogue](https://github.com/defaultnamehere/zzzzz).
@@ -55,6 +57,13 @@ Plotting some graphs
 2. Go to <http://localhost:5001> to view it
 3. Submit the FB User Name of a user whose activity you want to graph and the time span.
 
-The graph library used is blazing fast, allowing you to graph months of data, zoom in (select a segment of the graph) and out (double click on the graph) and pan around (Shift + Click).
+The graph library used is blazing fast, allowing you to graph months of data, zoom in (select a segment of the graph) and out (double click on the graph) and pan around (Shift + Click). You may want to create an index on the `Logs` table in the database, to further speed things up.
 
 The "webapp" uses basic authentication that can be enabled by creating an `auth_hash.txt` file which contains a MD5 hash of a concatenation of valid username and password pair.
+
+Collected Data Insights
+-----------------------
+
+Using data collected over almost 3 months (01.01.2019 – 05.04.2019 with a fetcher downtime in the middle of february) I was able to perform some basic data analysis. Here are the results:
+
+<img alt="Data Visualization" src="./resources/Collected Data Insights.png">

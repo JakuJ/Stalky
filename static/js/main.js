@@ -1,18 +1,18 @@
 //@ts-nocheck
 /* Grey out the 'Search' button until required inputs are provided */
-$('#query-form > input').keyup(function () {
+document.querySelector('#query-form > input').addEventListener('keyup', () =>  {
 
     var empty = false;
-    $('#query-form > input').each(() => {
-        if ($(this).val() === '') {
+    document.querySelectorAll('#query-form > input').forEach(x => {
+        if (x.value === '') {
             empty = true;
         }
     });
 
     if (empty) {
-        $('#Search').attr('disabled', 'disabled');
+        document.getElementById('Search').setAttribute('disabled', 'disabled');
     } else {
-        $('#Search').removeAttr('disabled');
+        document.getElementById('Search').removeAttribute('disabled');
     }
 });
 
@@ -75,12 +75,12 @@ function highlightWeekends(canvas, area, g) {
     }
 }
 /* Main front-end logic */
-$("#query-form").submit(e => {
+document.querySelector("#query-form").addEventListener('submit', e => {
     e.preventDefault();
 
-    var query = $("#query-input").val();
-    var timespan = $("#query-timespan").val();
-    var unit = $("#query-unit").val();
+    var query = document.getElementById("query-input").value;
+    var timespan = document.getElementById("query-timespan").value;
+    var unit = document.getElementById("query-unit").value;
 
     new Dygraph(document.getElementById("graphDiv"),
         `query/${query}/${timespan}/${unit}`, {
