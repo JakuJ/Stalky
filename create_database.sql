@@ -2,7 +2,8 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE Users (
     User_ID INTEGER PRIMARY KEY,
-    Profile_Name NVARCHAR(50)
+    Profile_Name NVARCHAR(50),
+    Student INTEGER
 );
 CREATE TABLE VC_Types (
     VC_ID INTEGER PRIMARY KEY

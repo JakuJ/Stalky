@@ -64,6 +64,6 @@ The "webapp" uses basic authentication that can be enabled by creating an `auth_
 Collected Data Insights
 -----------------------
 
-Using data collected over almost 3 months (01.01.2019 – 05.04.2019 with a fetcher downtime in the middle of february) I was able to perform some basic data analysis. Here are the results:
+Using data collected over almost 3 months (01.2019 – 04.2019 with a fetcher downtime in the middle of february) I was able to perform some basic data analysis. Here are the results:
 
 <img alt="Data Visualization" src="./resources/Collected Data Insights.png">
