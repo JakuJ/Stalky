@@ -60,13 +60,12 @@ def find_user_name(query: str):
     """Search the database for a profile name matching a specified string"""
     return query_database_one("SELECT Profile_Name FROM Users WHERE Profile_Name LIKE ?", ('%' + query + '%',))
 
-def insert_uid_uname(uid: str, uname: str):
+def insert_uid_uname(cursor, uid: str, uname: str):
     """Update or add a new user to the database"""
-    with DBConnection() as c:
-        if query_database_one('SELECT * FROM Users WHERE User_ID = ?', (uid,)):
-            c.execute('UPDATE Users SET Profile_Name = ? WHERE User_ID = ?', (uname, uid))
-        else:
-            c.execute('INSERT INTO Users (User_ID, Profile_Name) VALUES (?, ?)', (uid, uname))
+    if query_database_one('SELECT * FROM Users WHERE User_ID = ?', (uid,)):
+        cursor.execute('UPDATE Users SET Profile_Name = ? WHERE User_ID = ?', (uname, uid))
+    else:
+        cursor.execute('INSERT INTO Users (User_ID, Profile_Name) VALUES (?, ?)', (uid, uname))
 
 def insert_log(c, uid: str, data: dict):
     """Append a new logged datapoint to the Logs table"""

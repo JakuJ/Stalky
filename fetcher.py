@@ -69,7 +69,7 @@ class Fetcher():
         uname = fbapi.get_user_name(uid)
         if not uname:
             uname = fbapi.fetch_user_name(uid)
-            fbapi.insert_uid_uname(uid, uname)
+            fbapi.insert_uid_uname(cursor, uid, uname)
 
         # Extract last active time
         user_data = dict()
