@@ -45,8 +45,7 @@ class Fetcher():
     def make_request(self) -> Optional[dict]:
         """Make a request to Facebook's internal API"""
         url = "https://edge-chat.facebook.com/pull"
-        response_obj = requests.get(url, params=self.params, headers=self.REQUEST_HEADERS)
-
+        response_obj = requests.get(url, params=self.params, headers=self.REQUEST_HEADERS, timeout=60)
         try:
             raw_response = response_obj.text
             if not raw_response:
