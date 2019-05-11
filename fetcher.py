@@ -4,12 +4,13 @@ import time
 import requests
 import fbapi
 import sqlite3
+from typing import Optional
 
 SECRETS_PATH = "SECRETS.json"
 SLEEP_TIME = 1
 VC_TYPES = [0, 2, 8, 10, 74]
 
-def get_secret(field: str) -> object:
+def get_secret(field: str) -> str:
     """Read a field from the secrets file"""
     with open(SECRETS_PATH) as f:
         return json.load(f)[field]
@@ -41,7 +42,7 @@ class Fetcher():
         if not os.path.exists(fbapi.DB_PATH):
             fbapi.create_database()
 
-    def make_request(self) -> object:
+    def make_request(self) -> Optional[dict]:
         """Make a request to Facebook's internal API"""
         url = "https://edge-chat.facebook.com/pull"
         response_obj = requests.get(url, params=self.params, headers=self.REQUEST_HEADERS)
@@ -50,26 +51,28 @@ class Fetcher():
             raw_response = response_obj.text
             if not raw_response:
                 return None
+            
             if raw_response.startswith(self.JSON_PAYLOAD_PREFIX):
-                data = raw_response[len(self.JSON_PAYLOAD_PREFIX) - 1:].strip()
-                data = json.loads(data)
+                data = json.loads(raw_response[len(self.JSON_PAYLOAD_PREFIX) - 1:].strip())
             else:
                 data = json.loads(raw_response)
+            
+            print("--- Response ---\n" + str(data))
+            return data
         except ValueError as e:
             print(str(e))
             return None
-        
-        print("--- Response ---\n" + str(data))
-        return data
 
-    def log_lat(self, cursor, uid: str, record: object, activity_key: str):
+    def log_lat(self, cursor: sqlite3.Cursor, uid: str, record: dict, activity_key: str) -> None:
         """Log received information to the database"""
-        
         # Update user's info if necessary
-        uname = fbapi.get_user_name(uid)
+        uname = fbapi.get_user_name(cursor, uid)
         if not uname:
             uname = fbapi.fetch_user_name(uid)
-            fbapi.insert_uid_uname(cursor, uid, uname)
+            if uname:
+                fbapi.insert_uid_uname(cursor, uid, uname)
+            else:
+                raise TypeError("Couldn't receive user_name from FB API")
 
         # Extract last active time
         user_data = dict()
@@ -115,7 +118,7 @@ class Fetcher():
         }
         fbapi.insert_log(cursor, uid, user_data)
 
-    def start_request(self):
+    def start_request(self) -> None:
         """Query the internal API and log all data"""
         resp = self.make_request()
         if resp is None:
@@ -149,7 +152,7 @@ class Fetcher():
                             if "lat" in item["buddyList"][uid]:
                                 self.log_lat(cursor, uid, item["buddyList"][uid], 'p')
 
-    def reset_params(self):
+    def reset_params(self) -> None:
         self.params = {
             # ? No idea what these are
             'cap': '8',

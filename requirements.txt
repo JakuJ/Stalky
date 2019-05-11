@@ -1,5 +1,5 @@
 Flask
 gunicorn
 requests
+mypy
 sqlite3
-sqlitebck

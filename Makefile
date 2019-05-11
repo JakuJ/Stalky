@@ -6,7 +6,8 @@ SSH_PORT=22
 .PHONY: install fetcher server rename sync 
 
 install:
-	pip3 install -r requirements.txt
+	pip3 install --upgrade -r requirements.txt
+	mypy *.py
 
 fetcher:
 	until python3 fetcher.py; do echo "Fetcher crashed with exit code $?.  Respawning.." >&2; sleep 1; done
