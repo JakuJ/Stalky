@@ -67,11 +67,9 @@ class Fetcher():
         # Update user's info if necessary
         uname = fbapi.get_user_name(cursor, uid)
         if not uname:
+            # try to get uname from FB
             uname = fbapi.fetch_user_name(uid)
-            if uname:
-                fbapi.insert_uid_uname(cursor, uid, uname)
-            else:
-                raise TypeError("Couldn't receive user_name from FB API")
+            fbapi.insert_uid_uname(cursor, uid, uname)
 
         # Extract last active time
         user_data = dict()

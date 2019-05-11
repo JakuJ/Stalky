@@ -60,7 +60,7 @@ def find_user_name(cursor: sqlite3.Cursor, query: str) -> Optional[str]:
     """Search the database for a profile name matching a specified string"""
     return query_database_one(cursor, "SELECT Profile_Name FROM Users WHERE Profile_Name LIKE ?", ('%' + query + '%',))
 
-def insert_uid_uname(cursor: sqlite3.Cursor, uid: str, uname: str) -> None:
+def insert_uid_uname(cursor: sqlite3.Cursor, uid: str, uname: Optional[str]) -> None:
     """Update or add a new user to the database"""
     if query_database_one(cursor, 'SELECT * FROM Users WHERE User_ID = ?', (uid,)):
         cursor.execute('UPDATE Users SET Profile_Name = ? WHERE User_ID = ?', (uname, uid))
