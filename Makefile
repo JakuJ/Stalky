@@ -10,7 +10,7 @@ install:
 	mypy *.py
 
 fetcher:
-	until python3 fetcher.py; do echo "Fetcher crashed with exit code $?.  Respawning.." >&2; sleep 1; done
+	until python3 fetcher.py; do echo "Fetcher crashed with exit code $?.  Respawning..." >&2; sleep 1; done
 
 server:
 	gunicorn -w 2 --log-level debug --bind 0.0.0.0:${HTTP_PORT} wsgi

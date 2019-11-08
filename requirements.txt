@@ -2,5 +2,5 @@ Flask
 gunicorn
 requests
 mypy
-sqlite3
 typing
+urllib3
