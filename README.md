@@ -5,7 +5,7 @@ Stalky
 ![](https://img.shields.io/github/last-commit/JakuJ/zzzzz.svg)
 ![](https://img.shields.io/badge/creepiness-passable-orange.svg)
 
-<span style="color: orange;">Scroll down for collected data insights!</span>
+**This repository no longer works ever since Facebook decided to switch from HTTP requests to WebSockets**
 
 What is this?
 -------------
